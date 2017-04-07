@@ -1,0 +1,938 @@
+#+Title:     Environment
+#+Author:    Adolfo De Unánue
+#+Email:     adolfo.deunanue@itam.mx
+#+DATE:      2017
+#+DESCRIPTION: General discussion about the issues to be solve in order to build the product
+#+KEYWORDS:  data product 
+#+LANGUAGE:  en
+
+#+STARTUP: beamer
+#+STARUP: oddeven
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation, smaller]
+
+#+BEAMER_THEME: DarkConsole
+
+#+OPTIONS: H:1 toc:nil 
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+* Producto de datos: Ambiente
+
+* ¿Por qué es importante?
+
+- *Reproducibilidad*
+
+- *Documentación*
+
+- *Aislamiento*
+
+
+* ¿Cómo lo puedo hacer?
+
+| Característica             | Docker | AMI | ~python virtualenv~ | Ubuntu Juju |
+|----------------------------+--------+-----+---------------------+-------------|
+| Cross-platform             | ✓      | ✗   | ✗                   | ✓           |
+| Portable                   | ✓      | ✗   | ✗                   | ✓           |
+| ¿Se puede compartir?       | ✓      | ✓   | ✗                   | ✓           |
+| ¿Se puede usar como lego?  | ✓      | ✓   | ✗                   | ✓           |
+| ¿Soporte de la  comunidad? | ✓      | ✓   | ✗                   | ✓           |
+| Multi-lenguaje             | ✓      | ✓   | ✗                   | ✓           |
+
+* Docker Engine
+
+  [[./imagenes/docker-engine.png]]
+
+* Docker Engine
+
+Puedes pensar que *Docker* es como una laptop construida para un único propósito
+
+* Docker Engine vs Virtual Machines
+
+#+CAPTION: *Source*: Docker Inc.
+#+ATTR_ORG: :width 600px :height 600px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 150px :width 200px
+[[./imagenes/VM.png]]
+
+* Docker Engine vs Virtual Machines
+
+#+CAPTION: *Soirce*: Docker Inc.
+#+ATTR_ORG: :width 800px :height 800px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 130px :width 200px
+[[./imagenes/docker-containers.png]]
+
+
+* Docker Engine vs Virtual Machines
+
+- Los contenedores de Docker son más rápidos que una VM, ya que no tienen tanto
+  /overhead/ 
+
+- Es como ejecutar un binario en lugar de ejecutar todo un SO
+
+- Toda la especificación de una imagen de Docker, está especificada en un
+  archivo de texto llamado =Dockerfile=, el cual puede estar junto a tu
+  aplicación,
+
+* Docker Engine: Componentes
+
+- /Docker daemon/ 
+
+- /Docker CLI/
+
+
+* Checklist
+
+- Si no lo instalaron:
+  - https://docs.docker.com/engine/installation/
+
+- Si ya lo instalaron, verifiquen:
+
+#+begin_src shell :results verbatim drawer
+docker --version
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+Docker version 1.13.1, build 092cba3
+:END:
+
+
+* Checklist
+
+- ¿Funcionó?
+
+- Algo para tener a mano:
+  - https://github.com/wsargent/docker-cheat-sheet
+
+* Conceptos importantes
+
+- *Imagen*
+  - Son como los planos de un proyecto =(+ ó -)=
+  - Los planos de la laptop
+
+- *Contenedor*
+  - Es la cosa "construida" =(+ ó -)=
+  - Es como la laptop que mencionábamos antes
+
+* Comandos útiles
+
+Revisar las imágenes
+
+#+begin_src shell :results verbatim drawer
+docker images | head 
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+REPOSITORY               TAG                 IMAGE ID            CREATED             SIZE
+dummy/test-pyspark       latest              31b82821c1d3        3 weeks ago         1.26 GB
+dummy/test-python        latest              406f669d080d        3 weeks ago         1.52 GB
+dummy/test-r             latest              cb04e0c04c01        3 weeks ago         764 MB
+:END:
+
+* Comandos útiles
+
+Revisar los contenedores
+
+#+begin_src shell :results verbatim drawer
+docker ps -a | head 
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+:END:
+
+* Comandos útiles
+
+Descargar la imagen desde =dockerhub=
+
+#+begin_src shell :eval never
+docker pull ubuntu
+#+end_src
+
+*NOTA* Cambiar =push= por =pull=, hace que suban la imagen a =dockerhub=
+
+
+* Comandos útiles 
+
+Crear un contenedor a partir de una imagen, ejecutarlo y al salir destruir el contenedor
+
+#+begin_src shell :eval never
+docker run -it --rm ubuntu /bin/bash
+#+end_src
+
+*NOTA* Si la imagen no existe localmente, este comando descarga la imagen también.
+
+
+* Comandos útiles
+
+Crear un contenedor a partir de una imagen, ejecutarlo y asignarle un nombre (no
+destruye el contenedor al salir) 
+
+#+begin_src shell :eval never
+docker run -it  --name test-ubuntu ubuntu /bin/bash
+#+end_src
+
+
+* Comandos útiles
+
+Ejecutar un contenedor ya existente
+
+#+begin_src shell :eval never
+docker start -it test-ubuntu
+#+end_src
+
+* Comandos útiles
+
+Detener un contedor ya existente
+
+#+begin_src shell :eval never
+docker stop  test-ubuntu
+#+end_src
+
+* Comandos útiles
+
+Ver los =logs= o los procesos
+
+#+begin_src shell :eval never
+docker logs  test-ubuntu
+#+end_src
+
+#+begin_src shell :eval never
+docker top test-ubuntu
+#+end_src
+
+
+* Comandos útiles
+
+Y por último (importante para "/debuggear/"), conectarse a un contenedor "vivo"
+
+#+begin_src sh :eval never
+docker exec -it test-ubuntu /bin/bash
+#+end_src
+
+*NOTA* El comando =attach= hace que tu terminal se convierta en la del
+contenedor ejecutándose. Esto te permitirá ver lo que sucede, pero
+ten cuidado de no presionar  =C-c= o detendrás el contenedor.
+
+* Banderas
+
+- =-it= Activa el modo =i= nteractivo a una =t= erminal.
+  - También puedes usar =-at= pero este modo no es interactivo (es un /attach/).
+
+- =-rm= borra el contenedor cuando se apaga
+
+- =-v= /liga/ una carpeta de tu compu con una carpeta en el
+  contenedor.
+
+- =-p= /liga/ los puertos de tu compu con los puertos del contenedor.
+
+* ¿Cómo hago mi propio contenedor?
+
+- En un archivo ~Dockerfile~, en cual contiene todos los pasos de la
+  instalación.
+
+* DockerHub
+
+-  Docker image registry with a nice-ish web front end
+-  DockerHub:Docker :: GitHub:Git
+
+* ¿Microservicios?
+
+ Por construcción (y filosofía de diseño) las imágenes de ~docker~ sólo
+ejecutan una cosa a la vez
+
+- Es decir, se construyen como *microservicios* y estos son
+  *inmutables*.
+
+- Obviamente es posible darle la vuelta a esta restricción pero en esta clase no
+  lo haremos. 
+
+* ¿Y cómo hago un producto de datos?
+
+- Lamentablemente son más complejos que un sólo contenedor, involucran
+  varios contenedores
+
+- =docker= permite /linkear/ varios contenedor
+es (con la bandera
+  ~link~), pero las líneas de comandos resultantes, se vuelven
+  inmanejables (o por lo menos muy difíciles de /debuggear/).
+
+* ~Dockerfile~ : Hola mundo en =Python=
+
+#+BEGIN_SRC org :tangle ambiente/dpa-python/Dockerfile
+FROM python:3.5-slim
+
+MAINTAINER Adolfo De Unánue <adolfo.deunanue@itam.mx>
+
+ENV REFRESHED_AT 2017-02-14
+
+## Actualizamos
+RUN \
+    apt-get -qq update; apt-get upgrade -y -qq; \
+    apt-get install -y --no-install-recommends -qq wget curl git locales bzip2 unzip xz-utils build-essential; \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+## Arreglamos el LOCALE
+RUN echo "es_MX.UTF-8 UTF-8" >> /etc/locale.gen \
+    && locale-gen es_MX.utf8 \
+    && /usr/sbin/update-locale LANG=es_MX.UTF-8 \
+    && dpkg-reconfigure locales
+
+
+RUN apt-get update \
+    && apt-get install -y libblas-dev liblapack-dev gfortran \
+                       libpq-dev \
+                       make libssl-dev zlib1g-dev \
+                       libbz2-dev libreadline-dev libsqlite3-dev llvm \
+                       libncurses5-dev libncursesw5-dev xz-utils libpng12-dev \
+                       libfreetype6-dev libfreetype6 libxft-dev freetype* \
+                       libmysqlclient-dev
+
+## Requerimientos
+ADD requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+
+## Copiamos nuestro hola mundo
+ADD hello_world.py /tmp/hello_world.py
+
+CMD [ "python" , "/tmp/hello_world.py"]
+#+END_SRC
+
+
+* ~Dockerfile~ : Hola mundo en =Python=
+
+** =hello_world.py=
+
+#+BEGIN_SRC python :tangle ambiente/dpa-python/hello_world.py 
+# coding: utf-8
+
+print("¡Hola mundo desde Docker!")
+#+END_SRC
+
+* ~Dockerfile~ : Hola mundo en =Python=
+
+** =requirements.txt=
+
+#+BEGIN_SRC org :tangle ambiente/dpa-python/requirements.txt
+Flask
+psycopg2
+py2neo
+#+END_SRC
+
+* ~Dockerfile~ : Hola mundo en =Python=
+
+Crear la imagen:
+
+#+BEGIN_SRC sh :eval never
+docker build --tag dpa/hello-world:0.1 --tag dpa/hello-world:latest  ambiente/dpa-python
+#+END_SRC
+
+¿Cómo verificas que esté creada la imagen?
+
+Ejecutar un contenedor:
+
+#+BEGIN_SRC :eval never
+docker run --rm -it dpa/hello-world:0.1 
+#+END_SRC
+
+
+* ~Dockerfile~: Hola mundo en =Flask=
+
+** =hello_world_flask.py=
+
+#+BEGIN_SRC python :tangle ambiente/dpa-flask/hello_world_flask.py 
+
+  import os
+  import json
+
+  from flask import Flask, jsonify
+
+  app = Flask(__name__)
+
+  @app.route("/")
+  def hello():
+      return jsonify({ "mensaje": "Hola desde Flask (dentro de docker)" })
+
+  if __name__ == "__main__":
+      port = int(os.environ.get("API_PORT", 5000))
+      app.run(host="0.0.0.0", port = port)
+
+#+END_SRC
+
+
+* ~Dockerfile~: Hola mundo en =Flask=
+
+#+BEGIN_SRC org :tangle ambiente/dpa-flask/Dockerfile
+FROM dpa/hello-world:0.1
+
+MAINTAINER Adolfo De Unánue <adolfo.deunanue@itam.mx>
+
+ENV REFRESHED_AT 2017-02-14
+
+ADD hello_world_flask.py /tmp/hello_world_flask.py
+
+ENV API_PORT 8080
+
+EXPOSE 8080
+
+CMD [ "python", "/tmp/hello_world_flask.py" ]
+#+END_SRC
+
+* ~Dockerfile~: Hola mundo en =Flask=
+
+#+BEGIN_SRC sh :eval never
+docker run --rm -p 8080:8080 dpa/hello-world-flask:0.1
+#+END_SRC
+
+
+#+BEGIN_SRC sh :eval never
+http 0.0.0.0:8080
+#+END_SRC
+
+*  ~Dockerfile~: Hola mundo en =R=
+
+*¡Ejercicio!*
+
+1. Usen la imagen de ~R~ oficial: ~r-base~
+2. Creen un archivo en ~R~  que imprima 10 números tomados aleatoriamente de una
+   distribución normal
+
+
+* Docker Compose
+
+[[./imagenes/docker-compose.png]]
+
+* Docker Compose ¿Qué es?
+
+- ~docker-compose~ es una aplicación que permite manejar varios
+  contenedores, redes y volúmenes, de una manera sencilla en una sola
+  computadora (a.k.a. ~host~).
+- Todo lo que se necesita es hacer es especificar la aplicación (en nuestro caso
+  el producto de datos) en un archivo
+- Los comandos larguísimos (que no escribimos) se "transforman" en un
+  archivo de configuración ~YAML~.
+  - =YAML= es un archivo de texto plano con secciones.
+
+* Docker compose: Instalación
+
+- En esta liga:  https://docs.docker.com/compose/install/
+
+- Si están en ~Mac OS X~ (o ~Windows~)  e instalaron ~docker~, ya acabaron.
+
+- En =GNU/Linux=:
+
+#+begin_example
+sudo curl -L \
+ https://github.com/docker/compose/releases/download/1.10.0/docker-compose-$(uname -s)-$(uname -m) \
+-o /usr/local/bin/docker-compose
+#+end_example
+
+
+* Docker compose: Instalación
+
+- Damos permisos de ejecución
+
+#+begin_example
+chmod +x /usr/local/bin/docker-compose
+#+end_example
+
+- Y probamos
+  - Aunque estén en ~Mac OS X~.
+
+#+begin_src shell  :results verbatim drawer
+docker-compose --version
+#+end_src
+#+RESULTS:
+:RESULTS:
+docker-compose version 1.9.0, build 2585387
+:END:
+
+
+* ~docker-compose.yml~
+
+#+BEGIN_SRC docker :tangle ambiente/docker-compose.yml 
+  version: "3"
+
+  services:                                                                               
+     db:
+       image: postgres:9.6
+       env_file: .env 
+       ports:
+         - "5432:5432"
+
+     graphdb:
+       image: neo4j:3.1
+       ports:
+         - "7474:7474"
+         - "7687:7687"
+
+     api:
+       build:
+         context: ./dpa-flask
+         dockerfile: Dockerfile2
+       env_file: .env
+       ports:
+         - "8080:8080"
+
+#+END_SRC
+
+* Archivos de ambiente
+
+No queremos subir a ~github~  nuestros =passwords=, =usuarios=, =URLs=, etc
+
+** =_env=
+
+#+BEGIN_SRC org :tangle ambiente/_env
+## Variables de la API
+API_PORT=8080
+
+## Variables de PostgreSQL
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+#+END_SRC
+
+Copia el archivo =_env= a =.env=
+
+* Docker compose: Uso
+
+- Para ver que servicios están ejecutándose
+
+#+begin_src shell :results verbatim drawer
+docker-compose ps
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+:END:
+
+- Para construir los contenedores:
+
+#+begin_src shell :eval never
+docker-compose build
+#+end_src
+
+- Para levantarlos:
+
+#+begin_src shell :eval never
+docker-compose up -d
+#+end_src
+
+
+* Docker compose: Más comandos
+
+- Ver los ~logs~ de todos los contenedores compuestos
+
+#+begin_example
+docker-compose logs --tail 10 --follow
+#+end_example
+
+- Detener, matar y borrar
+
+#+begin_example
+docker-compose stop
+docker-compose kill
+docker-compose rm --force
+#+end_example
+
+* Docker Machine
+
+[[./imagenes/dockermachine2.png]]
+
+* Docker Machine ¿Qué es?
+
+- ~docker-machine~ es un comando para crear un ~host~ remoto de
+  ~Docker~ y además se encarga de resolver la comunicación/conexión de
+  red entre ese ~host~ nuevo y el cliente de ~docker~ de tu
+  computadora.
+
+- Soporta ~Virtualbox~ , ~Amazon Web Services~ , ~Digital Ocean~,
+  ~GCloud~ entre otras más.
+
+- Es importante notar que cada proveedor de nube tiene diferentes
+  formas de configurarse
+
+* Docker Machine en la nube
+
+[[./imagenes/docker-machine-cloud.png]]
+
+
+* Instalación
+
+- En esta liga: https://docs.docker.com/machine/install-machine/
+
+- Si están en ~Mac OS X~  o ~Windows~ ya está instalado si instalaron
+  ~docker engine~.
+
+- En ~GNU/Linux~:
+
+#+begin_example
+curl -L https://github.com/docker/machine/releases/download/v0.9.0/docker-machine-`uname -s`-`uname -m` \
+> /usr/local/bin/docker-machine && \
+chmod +x /usr/local/bin/docker-machine
+#+end_example
+
+*NOTA*: Probablemente necesites ser =root=
+
+* Instalación
+
+- Prueba que funciona
+
+#+begin_src shell
+docker-machine --version
+#+end_src
+
+* ¿Para qué?
+
+- ~docker-machine~ nos permite crear diferentes ambientes (~dev~,
+  ~testing~, ~production~) y mantenerlos "aislados".
+
+- Cada uno de estos ambientes se puede desplegar con diferentes
+  proveedores.
+
+- Para una lista de proveedores (~drivers~) consulta [[https://docs.docker.com/machine/drivers/os-base/][aquí]]
+
+- Un ejemplo de mi máquina:
+
+
+
+* En Virtualbox
+
+- Primero creamos 5 máquinas virtuales
+
+#+begin_src shell :eval never
+export MACHINE_DRIVER=virtualbox
+for N in $(seq 1 5); do
+docker-machine create dpa-node$N
+done
+#+end_src
+
+- Se puede cambiar la memoria (en ~MB~)  y el tamaño del disco (en ~MB~) con las banderas
+  ~--virtualbox-memory~ y ~--virtualbox-disk-size~
+
+
+- Veámos una lista de nuestras máquinas virtuales
+
+#+begin_src sh
+docker-machine ls
+#+end_src
+
+- Nota como ninguna máquina está *activa*.
+  - i.e. no estamos conectados controlando ninguna de ellas.
+
+
+* En AWS
+
+#+begin_src shell :eval never
+export MACHINE_DRIVER=amazonec2
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_DEFAULT_REGION=us-west-2
+# export AWS_INSTANCE_TYE=m3.large
+for N in $(seq 1 5); do
+docker-machine create dpa-aws-node$N                            
+docker-machine ssh dpa-aws-node$N sudo usermod -aG docker ubuntu
+done              
+#+end_src
+
+También van a necesitar esto:
+
+#+BEGIN_SRC sh 
+ aws ec2 authorize-security-group-ingress --group-name docker-machine --protocol -1 --cidr 0.0.0.0/0 
+#+END_SRC
+
+*NOTA*: Esto no es recomendable para producción, sólo para esta clase
+
+* Ejercicio
+
+- Conéctate a =dpa-node1=
+
+#+BEGIN_SRC sh :eval never
+docker-machine ssh dpa-node1
+#+END_SRC
+
+- Obtén la dirección ip
+
+#+BEGIN_SRC sh :eval never
+docker-machine ip dpa-node1
+#+END_SRC
+
+- Clona el repositorio de la clase
+
+- Instala =docker-compose=
+
+- Ejecuta =docker-compose up -d=
+
+- Obtén el mensaje de hola mundo usando =httpie=
+
+* Swarm!
+
+- =docker-compose= nos permite construir sistemas de múltiples partes ...
+   - ... pero todas ellas corren en un sólo nodo
+
+- =Swarm= nos permite resolverlo, ya que es una herramienta para manejar un
+  conjunto de /hosts/ de *Docker* y poder ejecutar contenedores en ellos.
+
+- Transforma un conjunto de ~docker hosts~ en una sola máquina
+  virtual.
+
+- Sirve para gestionar ~clústers~
+
+* Swarm en acción
+
+Vamos al =dpa-node1= e inicialicemos el /cluster/
+
+#+BEGIN_SRC  sh 
+docker swarm init
+#+END_SRC
+
+Y para ver que nodos pertenecen al /cluster/
+
+#+BEGIN_SRC sh 
+docker node ls
+#+END_SRC
+
+Sólo habrá uno.
+
+El comando para conectar nodos al /cluster/ se obtiene con
+
+#+BEGIN_SRC sh 
+docker swarm join-token worker
+#+END_SRC
+
+* Swarm en acción: ejercicio
+
+- Conectémonos al =dpa-node2=, y copia y pega el comando anterior
+
+- Regresa al nodo =dpa-node1= y ejecuta  =docker node ls= ¿Cuántos ves?
+
+
+* Swarm en acción: Nota
+
+Si la máquina tiene más de una dirección IP (e.g. Amazon EC2), es necesario
+especificar una dirección donde el cluster de =swarm= estará escuchando, por
+ejemplo:
+
+#+BEGIN_SRC sh 
+docker swarm init --advertise-addr 10.0.0.1
+#+END_SRC
+
+
+
+* El regreso de =docker-machine=: ejercicio
+
+- No es necesario conectarse vía =ssh= a los nodos.
+
+- Primero ejecuta  =docker-machine ls=, observa la columna de =ACTIVE=
+
+- Si alguno tiene un =*= ejecuta
+
+#+BEGIN_SRC sh 
+eval $(docker-machine env -u)
+#+END_SRC
+
+* El regreso de =docker-machine=: ejercicio
+
+- Activemos a =dpa-node1=
+
+#+BEGIN_SRC  sh 
+eval $(docker-machine env dpa-node1)
+#+END_SRC
+
+- Observa el nombre de la máquina
+
+#+BEGIN_SRC  sh 
+docker info | grep ^Name
+#+END_SRC
+
+Debería de regresar =Name: dpa-node1=
+
+* El regreso de =docker-machine=: ejercicio
+
+Conecta todos los /hosts/ al /cluster/
+
+#+BEGIN_SRC sh 
+TOKEN=$(docker swarm join-token -q manager)
+for N in $(seq 3 5); do
+  eval $(docker-machine env dpa-node$N)
+  docker swarm join --token $TOKEN $(docker-machine  ip dpa-node1):2377
+done
+eval $(docker-machine env dpa-node1)
+#+END_SRC
+
+Verificamos que todos estén conectados
+
+#+BEGIN_SRC  sh 
+docker node ls ## Si todo funcionó deberías de estar en dpa-node1
+#+END_SRC
+
+
+* Servicios swarm 
+
+- Un *servicio* es un contenedor que está distribuido en el /cluster/ de swarm
+
+- Por ejemplo, vamos a crear 7 servicios de *ElasticSearch*
+
+#+BEGIN_SRC sh 
+docker service create --name search --publish 9200:9200 --replicas 7 elasticsearch:2
+#+END_SRC
+
+¡Recuerda estar en =dpa-node1=!
+
+
+Observa los servicios
+#+BEGIN_SRC  sh 
+docker service ls
+#+END_SRC
+
+¡No están los 7! ¿Qué está pasando?
+
+* Servicios swarm
+
+Usemos otro comando, para tener una vista *global*
+
+#+BEGIN_SRC sh 
+docker service ps search
+#+END_SRC
+
+Swarm, además, administrará el tráfico de =TCP= de manera inteligente (TCP
+routing mesh), es decir, nos dará /load balancing/.
+
+#+BEGIN_SRC  sh 
+for N in $(seq 1 10); do  
+  http $(docker-machine ip dpa-node1):9200 | jq .name 
+done
+#+END_SRC
+
+Pero esto no maneja bien los =HTTP=, para eso necesitas =nginx= o =HAProxy=.
+
+* Todo junto
+
+Ahora que tenemos varios /hosts/ tenemos el problema de como distribuir el
+producto :
+
+- Para empezar si hacemos =docker-compose up= todas las imágenes quedarán en un
+  sólo /host/ 
+
+- ¡Pero las necesitamos en todos!
+
+- Podríamos usar =DockerHub= para tal menester, pero tendríamos que publicar
+  nuestro producto ahí ...
+
+- La solución más directa es utilizar un =registry= local
+  - Cuando lleguemos a /pipelines/ mostraremos una forma más sencilla
+
+
+* Todo junto: Registro
+
+- El registro (=registry=) es el equivalente local a *Dockerhub*
+
+- Aunque obviamente más limitado
+
+- Usaremos la imagen =registry:2=, la cual permite almacenar las imagenes en el
+  sistema local de archivos (o en =Amazon S3=, ver documentación)
+
+- Lo que haremos a continuación es publicarlo como servicio en el puerto =5000=,
+  lo cual lo hará disponible en =localhost:5000= en cada nodo.
+
+#+BEGIN_SRC  sh 
+docker service create --name dpa-registry --publish 5000:5000 registry:2
+#+END_SRC
+
+Espera unos segundos y luego ejecuta
+
+#+BEGIN_SRC sh 
+curl localhost:5000/v2/_catalog
+#+END_SRC
+
+
+* Publicar al registry
+
+Ahora publicaremos nuestra imagen =api=
+
+#+BEGIN_SRC sh 
+SERVICE=api
+PROJECT_NAME=ambiente
+DOCKER_REGISTRY=localhost:5000
+TAG=v0.1
+
+docker-compose build api
+docker tag $PROJECT_NAME_$SERVICE $DOCKER_REGISTRY/$PROJECT_NAME_$SERVICE:$TAG
+docker push $DOCKER_REGISTRY/$PROJECT_NAME_$SERVICE
+
+curl localhost:5000/v2/_catalog
+#+END_SRC
+
+* Crear una red
+
+#+BEGIN_SRC sh 
+docker network create --driver overlay dpa
+
+docker network ls
+#+END_SRC
+
+
+* Deploy to the cluster!
+
+Por último, usaremos el archivo =swarm-docker-compose.yml= para realizar un
+/deploy/ a nuestro /cluster/
+
+#+BEGIN_SRC sh 
+docker stack deploy -c swarm-docker-compose.yml dpa
+#+END_SRC
+
+
+
+
+* IMPORTANTE
+
+- ¡Recuerda apagarlas!
+- Si ya no las vas a utilizar *destrúyelas*
+
+#+begin_example
+docker-machine stop nombre
+docker-machine rm nombre
+#+end_example
+
+- Recuerda que es muy fácil crearlas ahora con ~docker-compose~ y
+  ~docker-machine~.
+
+
+
+
+* Tarea 2 (Grupal)
+
+#+BEGIN_SRC org :tangle tareas/tarea_2_grupal.org
+- Crea un /dashboard/ usando =shiny= que utilice como =backend= un servicio
+  =Flask=. Para conectarte utiliza el paquete de =R= ~httr~. 
+
+- El /dashboard/ muestra la base de datos =iris= guardada en una base de datos
+  =postgresql= i.e., el servicio web de =Flask= lee la base de datos, y devuelve un =json= con 
+  el dataset
+
+- Agrega otro contenedor que al ejecutarse obtiene un renglón al azar del /dataset/ y lo imprime en pantalla
+  (puedes construirlo en =bash= (=httpie=) o en =python=
+
+- Desarrolla todo, obviamente, usando =docker-compose= con =docker-machine= en *Amazon AWS*
+#+END_SRC
+
+* COMMENT Settings
+# Local Variables:
+# org-babel-sh-command: "/bin/bash"
+# org-confirm-babel-evaluate: nil
+# org-export-babel-evaluate: nil
+# ispell-check-comments: exclusive
+# ispell-local-dictionary: "british"
+# End:
+
+
+
+
+

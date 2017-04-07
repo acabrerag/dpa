@@ -1,0 +1,232 @@
+#+Title:     Pipelines
+#+Author:    Adolfo De Unánue
+#+Email:     adolfo.deunanue@itam.mx
+#+DATE:      2017
+#+DESCRIPTION: General discussion about the issues to be solve in order to build the product
+#+KEYWORDS:  datank product 
+#+LANGUAGE:  en
+
+#+STARTUP: beamer
+#+STARUP: oddeven
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation, smaller]
+
+#+BEAMER_THEME: DarkConsole
+
+#+OPTIONS: H:1 toc:nil 
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+
+* Data pipelines
+
+- Regularmente existen varios pasos de procesamiento para preparar los datos.
+  - Extraer los datos (desde una carpeta, el internet, una base de
+    datos) e importarlos al =hdfs=.
+  - Validar los datos.
+  - Transformarlos a un formato más adecuado.
+  - Ejecutar agregaciones y generación de variables.
+
+* Data pipelines
+
+- Estos pasos se empiezan a ejecutar:
+  - A un tiempo dado
+    - e.g. Cada medianoche
+  - Cuando un evento ocurre
+    - e.g. Se agregó un nuevo archivo
+
+* Data pipelines
+
+- Coordinar los pasos
+  - Un paso se sigue al otro, sólo si el anterior terminó
+    exitosamente.
+  - Repetir el paso
+
+* Data pipelines
+
+- Tomar acciones de gestión
+  - Mandar correos
+  - Tomar tiempos de ejecución
+
+
+* Data pipelines: en resumen
+
+#+BEGIN_QUOTE
+A data pipeline is a directed execution graph with multiple cleanly separated
+data processing steps, which are like small, clear pools: easy to know what’s in
+there. 
+#+END_QUOTE
+
+
+
+* Orquestación
+
+- Misma idea que en la línea de comandos.
+
+- Queremos *siempre* mantener el =raw= data.
+
+- Mantener el /data linage/.
+
+- Los datos siempre vienen mal, *casi siempre* hay que aplicar una serie de transformaciones a los datos.
+
+- Son más flexibles y modulares que los /scripts/.
+
+* Orquestación
+
+- Al concepto de coordinación, gestión, programación se les conoce
+  como /orquestación/.
+
+- La /orquestación/ (como muchas cosas en este curso) se representa
+  por un grafo dirigido acíclico (=DAG=).
+
+- A un =DAG= se le conoce como /workflow/ o /pipeline/ y a la administración de los
+  /worflows/ se le conoce commo *orquestación de workflows*.
+
+- En esta clase veremos a =Luigi= como /orquestador/.
+
+
+* ¿Qué ventajas?
+
+- Desacopla los pasos de procesamiento (*Transformaciones*)
+- Es fácil tener una /data linage/ básico
+- Ejecuta con cualquier tamaño de /dataset/
+
+* Luigi
+
+- Orquestador de *Spotify*
+
+- Escrito en =python=.
+  - Cualquier cosa funcionará entonces: =scikit=, =pyspark=, etc.
+
+- Integrado con =Hdfs=.
+
+- Soporta /out-of-the-box/ =postgresql=
+
+- Tiene algunas decisiones raras de diseño ...
+  - Ver los [[http://luigi.readthedocs.org/en/latest/api/luigi.contrib.html][contribs]] sobre todo los de =hive=, =sqla=, etc.
+
+* Luigi
+
+- *Idempotente*
+
+- /Checkpointing/
+
+- Funciona con /scripts/ arbitrarios.
+
+- Tiene una interfaz web
+
+- ¡Manda correos electrónicos!
+
+* Luigi: Cascarón
+
+#+BEGIN_EXAMPLE python
+
+  # coding: utf-8
+
+  import luigi
+  import luigi.s3
+
+  class SimpleTask(luigi.Task):
+
+        def requires(self):
+            pass
+
+        def output(self):
+            pass
+
+        def run(self):
+            pass
+
+#+END_EXAMPLE
+
+* Otros tipos de =Task=
+
+- =luigi.WrapperTask= 
+  - Sirve para disparar varias clases, 
+  - Sólo hay que  especificar el método =requires=
+
+- =luigi.ExternalTask=
+  - Representa un objeto externo al /pipeline/, por ejemplo un archivo.
+  - Sólo hay que codificar el método =output=
+
+
+* Modelo de ejecución
+
+- La ejecución no es *transferida*
+
+- El /worker/ *agenda* todas sus tareas y *ejecuta* las tareas     
+
+- =Luigi= no incluye su propio /triggering/, debes de usar un /triggering/
+  externo, como =crontab=
+
+* Partes móviles
+
+- =Luigi server=
+  - Servidor encargado de la orquestación remota de los =Task=
+
+- Parámetros
+  - Son como los /argumentos/ de los =Task=, deben de ser diferentes si queremos
+    varias ejecuciones de los mismos. Un ejemplo puede ser la fecha o los
+    hiperparámetros de un modelo.
+
+- Archivo =luigi.cfg=
+  - Aquí se configura varios de los parámetros de los =Task= y del =Luigi server=
+
+* Ejemplo: Luigi
+
+Esta es la manera "tradicional" de ejecutar tareas de =Luigi=
+
+
+* Ejemplo: Luigi + Docker
+
+Una manera más "modularizada", utilizando =Docker= como principal vehículo del
+=Task=
+
+Basado en (Poner referencia)
+
+
+* Tarea 3  (Grupal)
+
+#+BEGIN_SRC org :tangle tareas/tarea_3_grupal.org
+
+ Our old friend: *The Magic loop*, Ahora en su presentación de /pipeline/
+
+ 1.  Vamos a partir del =iris= /dataset/ y vamos a entrenar varios modelos para predecir la variable del tipo de flor.
+
+ 2. Estos modelos *no* pueden entrenar en serie. Cada modelo entrenará  en un =Task=, con parámetros: 
+   - Nombre del algoritmo
+   - Hiperparámetros
+
+ 3. La salida de los =Task= debe de ser un archivo =pickle= llamado =nombre_algoritmo/nombre_algoritmo-lista-hiperparámetros.pl= 
+   y un archivo =json= con la siguiente estructura:
+
+ #+BEGIN_EXAMPLE json 
+ {
+   "algoritmo": "nombre_algoritmo",
+   "hiperparametros": {
+       "hiperparametro_1": valor,
+       "hiperparametro_1": valor,
+       ...
+   "path": "path_al_archivo_pickle"
+   }     
+  
+ }
+ #+END_EXAMPLE
+
+ #+END_SRC
+
+
+* COMMENT Settings
+# Local Variables:
+# org-babel-sh-command: "/bin/bash"
+# org-confirm-babel-evaluate: nil
+# org-export-babel-evaluate: nil
+# ispell-check-comments: exclusive
+# ispell-local-dictionary: "spanish"
+# End:
+
+

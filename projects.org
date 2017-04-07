@@ -1,0 +1,130 @@
+#+Title:     Projects
+#+Author:    Adolfo De Unánue
+#+Email:     adolfo.deunanue@itam.mx
+#+DATE:      2017
+#+DESCRIPTION: General discussion about the issues to be solve in order to build the product
+#+KEYWORDS:  datank product 
+#+LANGUAGE:  en
+
+#+STARTUP: beamer
+#+STARUP: oddeven
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation, smaller]
+
+#+BEAMER_THEME: DarkConsole
+
+#+OPTIONS: H:1 toc:nil 
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+* 1. Extropy chat
+
+- Which are the topics discussed?
+- Could you detect conversations?
+- Who are the actors?
+- Could you detect groups?
+- Are this groups stable on time?
+- Could you predict who will answer to whom? Is this related to some knowledge
+  of the person? Could you infer the expertise of the person? 
+
+*Source* [[http://lists.extropy.org/pipermail/extropy-chat/][The extropy chat archives]]
+
+* 2. This google life of mine
+
+- Anonymize your data, Which steps you need to take in account? Could you have
+  some rules for doing it? Or using some ML algorithm for doing that?
+- Get your network from your emails
+- Get your interests from your searches
+- Get your path of life from your locations
+- Are there any relations?
+- Create this a product, i.e. any could put their data in your pipeline and see
+  his life 
+- Are this related to your other social networks?
+- How you could modify your tool so it could be used for a group?
+
+*Source* [[https://takeout.google.com/settings/takeout][Google Takeout]]
+
+* 3. Listverse
+
+- Which are the topics that the site has? 
+- If you run a topic modeller, Are your topics in agreement with the site? How
+  could you quantify the agreement?
+- How you would characterise the authors? Could you predict the author from the
+  text? And viceversa?
+- Are articles repeated (or similar)? Items repeated (or similar)? Could you
+  cluster using that?
+- Could you trace a genealogy of articles (i.e. which article gave rise to which article?)
+- Create a Knowledge graph from the articles
+
+*Source*: [[http://listverse.com][Listverse]]
+
+* 4. Cinta de aduanas
+
+- Design the semantic table for this domain
+- There are several text fields with descriptions. Could you use that for
+  cleaning and get a better estimate of what is happening?
+- Do some research and add data to guess which are the possible national buyers (or
+  importers) or national sellers (or exporters) 
+  - By state or municipality or is you feel adventurous by company
+- Which is the commercial network of Mexico? 
+  - Do additional research and go to the Economic Complexity explorer
+- How resilient is this network? What could be our major lost?
+- Which are the aduanas with more bottle-necks?
+- Could you predict the next days or weeks? Could you generate what-if scenarios?
+
+*Source*: [[ftp://ftp2.sat.gob.mx/aduanas/][Aduanas]]
+
+* 5. Wikipedia
+
+- Which are the topics that generate the more conflicts? How do you define
+  conflict?
+- The hot-topics are related to external events? Which are the timeframes of
+  "hotness"?
+  - GDELT anyone?
+- Are there revivals?
+- Could you predict the revival? Or the hotness frame? Or which topic will become
+  hot?
+ 
+*Source*: [[https://en.wikipedia.org/wiki/Wikipedia:Database_download][Wikipedia]]
+
+* 6. Compranet
+
+- We will create a machine that asks for "acceso a la información"
+- Design the semantic table for this domain
+- Scrap the web for getting information for the service providers
+- Scrap the "Directorio" for more information of the
+- Download the documents of the service provider and from the petition. Are
+  there related? How do you could detect anomalies there?
+- Create a graph. How do you could detect anomalies there?
+- Could you predict the petitions? Could you predict who will win?
+- Which  will be your recommendations for measuring any change after the *SNA*'s implementation?
+
+*Source*: [[https://compranet.funcionpublica.gob.mx/web/login.html][Compranet]]
+
+* 7. Cámara de Senadores
+
+- *Diarios de Debates*: Which are the topics?
+- Actors: How they vote? Are they respecting his/her party line?
+- After Vicente Fox's presidency, are there any change in the behaviour?
+  diversity? votes? topics?
+- In which topics they make alliances? In which topics they vote?
+- Which are their proposals?
+- Could you predict the votes? And the individual votes?
+- *Diario Oficial de la Federación*: Which are the topics? Which are the relationships?
+
+*Source*: [[http://www.senado.gob.mx/][Cámara de Senadores]]
+*Source*: [[http://cronica.diputados.gob.mx/][Cámara de Diputados]]
+
+
+* COMMENT Settings
+# Local Variables:
+# org-babel-sh-command: "/bin/bash"
+# org-confirm-babel-evaluate: nil
+# org-export-babel-evaluate: nil
+# ispell-check-comments: exclusive
+# ispell-local-dictionary: "british"
+# End:

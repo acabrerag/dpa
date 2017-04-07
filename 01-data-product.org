@@ -1,0 +1,568 @@
+#+Title:     Data Product
+#+Author:    Adolfo De Unánue
+#+Email:     adolfo.deunanue@itam.mx
+#+DATE:      2017
+#+DESCRIPTION: General discussion about the issues to be solve in order to build the product
+#+KEYWORDS:  datank product 
+#+LANGUAGE:  en
+
+#+STARTUP: beamer
+#+STARUP: oddeven
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation, smaller]
+
+#+BEAMER_THEME: DarkConsole
+
+#+OPTIONS: H:1 toc:nil 
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+
+* ¿Qué es la Ciencia de datos?
+#+BEGIN_QUOTE
+Estudio *fenomenológico* de *Sistemas Complejos Adaptativos*, con el propósito de
+construir *productos de datos* que ayuden/soporten a la toma de decisiones y acciones
+sobre el sistema.
+#+END_QUOTE
+
+* ¿Qué hace el científico de datos?
+
+*Productos de datos*
+
+* ¿Qué es un producto de datos?
+
+La materialización de sistemas y procesos para la ingestión, almacenamiento,
+tratamiento, transformación y entendimiento de datos para que puedan ser consumidos por agentes
+que tienen como objetivo tomar acciones o decisiones sobre diversos sistemas. 
+
+Los agentes en cuestión pueden ser humanos o algoritmos de aprendizaje de
+máquina o agentes de inteligencia artificial. 
+
+
+* Otra definición
+
+- A *data product* is a system (or an agent) that continuously is sensing the
+  environment, processing that information and providing actions or insights.
+
+- It will form a /feedback loop/
+
+* ¿Por qué necesitamos un producto de datos?
+
+- The environment will adapt to our actions
+- /Temporal drifting/
+- In the best scenario, the organisation will adapt to those changes
+
+* ¿Cómo lo implementamos?
+
+- The *data product* is a transverse component in the architecture of the
+  organisation, i.e. it touches several areas or divisions of the organisation,
+  since it needs extract data from several sources.
+
+- Besides this, the actions, taken or recommended, will impact several areas of
+  the organisation.
+
+
+* Disruption in the organisation
+
+Esto obviamente causará *cambios* o *disrupciones* en como la organización
+opera.
+
+¿Cómo planeamos estas transformaciones?
+
+* Enterprise Architecture
+
+* Enterprise?
+
+#+BEGIN_QUOTE
+"[E]nterprise" is any collection of organizations that has a common
+set of goals. For example, an enterprise could be a government agency, a whole
+corporation, a division of a corporation, a single department, or a chain of
+geographically distant organizations linked together by common ownership. 
+
+*TOGAF 9.1 specification*
+#+END_QUOTE
+
+* Enterprise?
+
+#+BEGIN_QUOTE
+[I]n the context of "enterprise architecture" can be used to denote both an entire 
+enterprise - encompassing all of its information and technology services, processes, 
+and infrastructure-  and a specific domain within the enterprise.
+
+
+*TOGAF 9.1 specification*
+#+END_QUOTE
+
+
+* Architecture?
+
+#+BEGIN_QUOTE
+The fundamental organization of a system, embodied in its components, their
+relationships to each other and the environment, and the principles governing
+its design and evolution.
+
+*ISO/IEC 42010:2007*
+#+END_QUOTE
+
+
+* Enterprise Architecture
+
+We could divide the Enterprise in the following layers:
+
+#+BEGIN_QUOTE
+Enterprise Architecture
+is about the coherent design and modeling of all following layers:
+
+- Business and Information Layer
+- Application and Data Layer
+- Infrastructure Layer
+
+*Gerban Wierda, 2014*
+#+END_QUOTE
+
+* Why do we need it?
+
+- To prevent IT chaos
+  - We need structure in our landscape
+- To make sure that Business-IT landscape fits the strategic business goals 
+  - We want our structure to *follow* strategy
+- To make sure the Business profits from opportunities enabled by IT 
+  - We want our structure to *enable* strategy
+
+/Chess and the art of Enterprise Architecture/ *Gerban Wierda*
+
+
+* EA: It is about *choices*
+
+- In change initiatives, *choices* are being made that are not in line with the
+  company's *future*, *unknown* requirements
+- In change initiatives, *choices* are being made in different parts of the
+  organization that conflict with each other (/de facto/ not in line with
+  *current*, *unmanaged* requirements)
+- In change initiatives, *choices* are being made that are suboptimal, e.g bad for
+  continuity, cost, timeliness, flexibility (/de facto/ not in line with
+  *current*, *unmanaged* requirements)
+
+/Chess and the art of Enterprise Architecture/ *Gerban Wierda*
+
+
+* What does the Architect do?
+
+The Enterprise Architect helps to define the following:
+
+- *Current State Architecture* (or AS-IS). Descriptive Model of how the current
+  landscape of business and IT is. It is used for reporting and analysis.
+- *Future State Architecture* (or TO-BE). Is a /rough/ prescription on how the
+  future landscape should be.
+- *Change architectures*. These  are the descriptions of what the changes
+  initiatives (like projects) will produce.
+
+
+* The framework: TOGAF 9.0
+
+- /The Open Group Architecture Framework/, [[https://www.opengroup.org/togaf/][TOGAF 9]] 
+
+#+BEGIN_QUOTE
+TOGAF is an architecture framework. TOGAF provides the methods and tools for
+assisting in the acceptance, production, use, and maintenance of an enterprise
+architecture. It is based on an iterative process model supported by best
+practices and a re-usable set of existing architecture assets. 
+
+*TOGAF 9.1*
+#+END_QUOTE
+
+
+* TOGAF's different architectures / different questions
+
+- The *Business Architecture* 
+  - What does the business do?
+  - How does the business do these things?
+- The *Data Architecture* 
+  - What are the key pieces of information that the business needs?
+  - Which is the Enterprise Data Model?
+- The *Application Architecture* 
+  - What are the key functions that our applications need to provide?
+- The *Technology Architecture* 
+  - What are the key technology that our applications and business need?
+
+* TOGAF's different architectures / different questions
+
+#+BEGIN_NOTES
+- The *Business Architecture* defines the business strategy, governance,
+  organisation, and key business processes. 
+  - What does the business do?
+  - How does the business do these things?
+- The *Data Architecture* describes the structure of an organisation's logical and
+  physical data assets and data management resources. 
+  - What are the key pieces of information that the business needs?
+  - Which is the Enterprise Data Model?
+- The *Application Architecture* provides a blueprint for the individual
+  applications to be deployed, their interactions, and their relationships to
+  the core business processes of the organisation. 
+  - What are the key functions that our applications need to provide?
+- The *Technology Architecture* describes the logical software and hardware
+  capabilities that are required to support the deployment of business, data,
+  and application services. This includes IT infrastructure, middleware,
+  networks, communications, processing, standards, etc. 
+  - What are the key technology that our applications and business need?
+#+END_NOTES
+
+* Method: ADM cycle
+
+#+BEGIN_QUOTE
+[I]ncludes establishing an architecture framework, developing architecture content,
+transitioning, and governing the realization of architectures. 
+
+*TOGAF 9.1*
+#+END_QUOTE
+
+* Method: ADM cycle
+
+#+CAPTION: Architecture Development Method (*ADM*) cycle
+#+ATTR_ORG: :width 600px :height 300px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 150px :width 200px
+[[file:imagenes/adm.png]]
+
+
+* Method: ADM cycle
+
+#+CAPTION: *Source*: IASA
+#+ATTR_ORG: :width 800px :height 800px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 150px :width 200px
+[[file:imagenes/introduction-to-enterprise-architecture-and-togaf-91-34-638.jpg]]
+
+
+* Architecture Metamodel
+
+#+CAPTION: TOGAF's Architecture Metamodel
+#+ATTR_ORG: :width 800px :height 800px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 170px :width 200px
+[[file:imagenes/togaf9b.jpg]]
+
+
+
+* Knowledge Repository
+
+#+CAPTION: Image courtesy of the [[http://pubs.opengroup.org/architecture/archimate3-doc/ts_archimate_3.0_files/image230.png][Open Group]]
+#+ATTR_ORG: :width 800px :height 800px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 170px :width 200px
+[[file:imagenes/02_concepts3.png]]
+
+
+* Language: Archimate
+
+[[http://pubs.opengroup.org/architecture/archimate3-doc/][Archimate 3.0]]
+
+#+BEGIN_QUOTE
+The standard provides a set of entities and relationships with their corresponding
+iconography for the representation of Architecture Descriptions 
+
+*ArchiMate 3.0 Specification*
+#+END_QUOTE
+
+* Elements
+
+Archimate has three types of elements:
+
+
+- *Active* elements: Those who act on something
+- *Behavioural* elements: Those who represent the behaviour of the previous elements
+- *Passive* elements: Those who can't act but are acted upon by that behaviour
+
+* Elements
+
+*who*  *acts* on *what*
+
+#+CAPTION: Basic Archimate pattern showing Business, Application and Technology layers.
+#+ATTR_HTML: :height 600px
+#+ATTR_ORG: :width 650px :height 600px
+#+ATTR_LATEX: :height 130px :width 200px
+[[file:imagenes/archimate_basic.png]]
+
+
+* Relationship between TOGAF 9.1 and Archimate 3.0
+
+#+CAPTION: Image courtesy of the [[http://pubs.opengroup.org/architecture/archimate3-doc/ts_archimate_3.0_files/image230.png][Open Group]]
+#+ATTR_HTML: :width 700px :height 500px
+#+ATTR_ORG: :width 600px
+#+ATTR_LATEX: :height 130px :width 200px
+[[file:imagenes/image230.png]]
+
+
+* EA's Challenges 
+
+#+BEGIN_QUOTE
+Now, here is our very inconvenient truth: Enterprise Architecture as
+a discipline has so far largely failed to produce the intended results
+
+*Gerben Wierda, 2014*
+#+END_QUOTE
+
+
+* Example: Implementing DS in an enterprise
+
+* Request
+
+/Enterprise A/: *Do we have the conditions to embark in a Data Science project?*
+
+* Example: Things to identify
+
+- Why they want a Data Science initiative?
+- Who are the main stakeholders? Which are their goals and concerns? Which are
+  the main pains? Are those pains related to data? 
+- Define precisely what the different stakeholders understand by "data science"?
+- How aligned are the DS initiative and the actual and future goals of the
+  enterprise?
+- Which data do they have? How is that data? Where is that data? In which kind of
+  storage? Is accessible?
+- Do the enterprise have the processes to consume and produce data?
+- How reliable is the infrastructure?
+- Taken all this in account, Which are the gaps between the Current State Architecture
+  and the Future State Architecture?
+
+* Example: The Strategy
+
+- Use a tailor-made ADM cycle: Only the phases A-E
+- Identify the  stakeholders and their concerns 
+- Apply questionnaires and interview the stakeholders
+  - Identify the main business processes
+- Collect (using templates) the information about Infrastructure, Applications
+  and Data
+- Analyse SWOT / TOWS
+- Process the information to [[http://archimatetool.com][Archi]], an Archimate/EA tool
+  - and then import that to a graph database.
+- Establish the Data Maturity Level
+- /Gap Analysis/
+
+* Example: Business concerns
+
+- Less manual work for integrating data
+- Increase confidence in data
+ 
+
+* Example: Business cases
+
+- Deliver more complex data to the internal users in shorter response times
+- Know their client better. Know the full span of the life cycle of the customer,
+  so they can deliver more customised experience.
+- Know better their operational force.
+
+
+* Example: Data Maturity Level
+
+- Data Governance
+  - Do they know what data they have? How is the access to the data? Are there
+    any docs? Are in place process about quality and anonymization? 
+- Data Readiness
+  - Do they have the data? How that data is stored? Is accessible? Which format
+    they use? Are there silos? do they have historic data?
+- CxO Engagement
+  - Do the C-level believe in taking data-driven decisions? Are there any budget
+    for this? A plan? A business case? 
+- Organisational Engagement
+  - The organisation is involved actively in the data? Do they use it for taking decisions?
+
+/Adapted from DSaPP's Data Maturity Level Assessment/ *University of Chicago*
+
+* Example: Data Maturity Level
+
+- Financial Impact
+  - What is the financial impact of those efforts (if any)?
+- Data Science Readiness
+  - Do they use some Data Science tools or methods ? Do they have the
+    capabilities in the enterprise for start using it? Are there any
+    organisational structure for execute the projects?
+- Technological Readiness
+  -  What tools do they use for analysis, processing and storage? Which is the
+    technological level? How agile they are?
+- Organisational Readiness
+  - Is the organisation ready? Do they feel the pain of using data? Do they have
+    the skills needed?
+
+/Adapted from DSaPP's Data Maturity Level Assessment/ *University of Chicago*
+
+
+
+* Example: Gap Analysis
+
+
+[[http://pubs.opengroup.org/architecture/togaf9-doc/arch/chap27.html][TOGAF Gap Analysis]]
+
+
+- Identify the Capabilities needed
+
+- Identify the Gaps, impacts, risks, and efforts required for filling those gaps
+
+  - Training, Infrastructure, Process, etc...
+
+- Determine the building blocks
+
+
+* Example of Building Block
+
+#+begin_src ditaa :file imagenes/data_lake.png :cmdline -r :exports none
+
+                                  +---------------------------------------------------------------------------------------------------------------+
+                                  |   cBLK                                         Data lake                                                      |
+                                  +---------------------------------------------------------------------------------------------------------------+
+                                  |   +------------------------------+          +--------------------------+     +--------------------------+     |
+    +-------------------------+   |   |                              |          |  cGRE                    |     |  cYEL                    |     |     +-------------------------+
+    |   c1AB                  |   |   |                              |          |  Processed data          |     |                          |     |     |  cRED                   |
+    |                         |   |   |                              |          |                          |     |                          |     |     |                         |
+    |                         |   |   |                              |          |                          |     |  Trustworthy data        |     |     |                         |
+    |                         |   |   |    Raw data                  |          |                          |     |  "Golden standard"       +---------->|                         |
+    |                         |   |   |                              +--------->|                          +---->|                          |     |     |                         |
+    |                         |   |   |                              |          |                          |     |                          |     |     |                         |
+    |                         |   |   |                              |          |                          |     |                          |     |     |                         |
+    |    Data                 |   |   |                              |          |                          |     |                          |     |     |                         |
+    |                         |   |   |                              |          |                          |     |                          |     |     |                         |
+    |    Sources              |   |   |                              |          +--------------------------+     +--------------------------+     |     |    Consumption          |
+    |                         +-->|   |                              |                        |                               |                   |     |                         |
+    |                         |   |   |                              |                        |                               |                   |     |                         |
+    |   o Files               |   |   |                              |          +------------------------------------------------------------+    |     |                         |
+    |   o DB                  |   |   |                              |          |  cPNK                                                      |    |     |                         |
+    |   o API                 |   |   |    +---------------------+   |          |  Exploration Sandbox                                       |    |     |                         |
+    |   o Streaming           |   |   |    |   c1FF              |   |          |                                                            |    |     |                         |
+    |   o Logs                |   |   |    |   Anonymized        |   |          |                                                            |    |     |                         |
+    |   o ODS                 |   |   |    |                     |   |          |                                                            |    |     |                         |
+    |   o OLTP                |   |   |    |   data              |   |          |                                                            |    |     |                         |
+    |                         |   |   |    |                     |   +--------->|                                                            |    |     |                         |
+    |                         |   |   |    |                     |   |          |                                                            |    |     |                         |
+    |                         |   |   |    |                     |   |          |                                                            |    |     |                         |
+    |                         |   |   |    |                     |   |          |                                                            |    |     |                         |
+    |                         |   |   |    +---------------------+   |          |                                                            |    |     |                         |
+    |                         |   |   |                              |          |                                                            |    |     |                         |
+    |                         |   |   |                              |          +------------------------------------------------------------+    |     |                         |
+    +-------------------------+   |   +------------------------------+                                                                            |     +-------------------------+
+                                  |                                                                                                               |
+                                  |          +-------------------+   +-------------------+   +-------------------+  +-------------------+         |
+                                  |          |    c33F           |   |   c33F            |   |  c33F             |  | c33F              |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          |    Metadata       |   |   Data Quality    |   |  Catalogs         |  | Security          |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          |                   |   |                   |   |                   |  |                   |         |
+                                  |          +-------------------+   +-------------------+   +-------------------+  +-------------------+         |
+                                  +---------------------------------------------------------------------------------------------------------------+
+#+end_src
+
+#+CAPTION: /Building Block: Data Lake/
+#+ATTR_ORG: :width 800px :height 800px
+#+ATTR_HTML: :width 800px :height 600px
+#+ATTR_LATEX: :height 130px :width 200px
+#+RESULTS:
+[[file:imagenes/data_lake.png]]
+
+
+* How DS could help EA?
+
+
+Many of the current processes in the enterprise have 
+low visibility (/What is happening?/), unknown bottlenecks (/Why is this
+happening?/), lack of quality checks (/This is so complex.../)
+
+All this together doesn't facilitate communication between units of the
+enterprise and makes growth and automation difficult.
+
+Data science could help to improve efficiency and consistence, provide better
+visibility internally between units and it will allow the business to make
+data-driven decisions.
+
+DS could do that providing new tools (Graph databases) and techniques (Network
+analysis, Resilience, Prediction) for the analysis in the CSA.
+
+
+* How EA could help DS
+
+- Giving visibility about the impacts across the organisation
+
+- Providing a semantic and an ontology
+
+- Helping to create the data lake and to solve the record linkage problems
+
+
+* Some glimpses in the future
+
+- Intelligent Dataware houses or Data lakes
+
+- Question and answering systems
+  
+- Multi-agents systems using the knowledge about the enterprise 
+
+- The enterprise as an autonomous agent
+
+* Architecture Principles
+
+* Arquitectura de productos de datos
+#+BEGIN_QUOTE
+
+
+ " Any organization that designs a system (defined broadly) will produce a design
+ whose structure is a copy of the organization's communication structure"
+
+
+*Melvyn Conway, 1967*
+
+#+END_QUOTE
+
+
+* /Unix Philosophy/, 1978
+
+#+BEGIN_QUOTE
+- "... write programs that do one thing and do it well"
+- "... write programs to work together"
+
+*M. Douglas Mcllroy*
+
+/Head Computing Sciences Research Center, Bell Labs/
+
+(Inventor del Unix pipe ~|~ )
+
+#+END_QUOTE
+
+
+* Business Case for Data Science
+
+
+* Why is it important?
+
+#+BEGIN_QUOTE
+Another conceivable path to superintelligence is through the gradual enhancement
+of networks and organizations that link indidivual human minds with one another
+and with various artifacts and bots... a  system's collective intelligence is
+limited by the abilities of its members minds, the overheads in communicating
+relevant information between them, and the various distortions and
+inefficiencies that pervade human organizations ... Even partial solutions to
+these problems could pay hefty dividends for collective intelligence
+
+/Superintelligence/, *Nick Bostrom*
+
+#+END_QUOTE
+
+
+
+
+
+* COMMENT Settings
+# Local Variables:
+# org-babel-sh-command: "/bin/bash"
+# org-confirm-babel-evaluate: nil
+# org-export-babel-evaluate: nil
+# ispell-check-comments: exclusive
+# ispell-local-dictionary: "british"
+# End:
+
+
+
+
+

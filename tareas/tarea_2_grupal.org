@@ -1,0 +1,11 @@
+- Crea un /dashboard/ usando =shiny= que utilice como =backend= un servicio
+  =Flask=. Para conectarte utiliza el paquete de =R= ~httr~. 
+
+- El /dashboard/ muestra la base de datos =iris= guardada en una base de datos
+  =postgresql= i.e., el servicio web de =Flask= lee la base de datos, y devuelve un =json= con 
+  el dataset
+
+- Agrega otro contenedor que al ejecutarse obtiene un renglón al azar del /dataset/ y lo imprime en pantalla
+  (puedes construirlo en =bash= (=httpie=) o en =python=
+
+- Desarrolla todo, obviamente, usando =docker-compose= con =docker-machine= en *Amazon AWS*

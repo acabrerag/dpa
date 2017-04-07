@@ -1,0 +1,1496 @@
+#+Title:     Review
+#+Author:    Adolfo De Unánue
+#+Email:     adolfo.deunanue@itam.mx
+#+DATE:      2017
+#+DESCRIPTION: Repaso general
+#+KEYWORDS:  data product review data-science
+#+LANGUAGE:  es
+
+#+STARTUP: beamer
+#+STARUP: oddeven
+
+#+LaTeX_CLASS: beamer
+
+#+LaTeX_HEADER: \usepackage{fontspec}
+#+LaTeX_HEADER: \setmainfont{FreeSerif}
+#+LaTeX_HEADER: \setsansfont{FreeSans}
+#+LaTeX_HEADER: \setmonofont{Latin Modern Mono}
+
+#+LaTeX_CLASS_OPTIONS: [presentation, smaller]
+
+#+BEAMER_THEME: DarkConsole
+
+#+OPTIONS: H:1 toc:nil 
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+PROPERTY: header-args    :cache yes
+#+PROPERTY: header-args:shell :results output :exports both :tangle no
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+
+** Bambalinas                                                      :noexport:
+
+#+begin_src shell :var TANGLED=(org-babel-tangle)
+  wc $TANGLED
+#+end_src
+
+
+* Introducción
+
+Vamos a repasar (muy rápidamente) lo aprendido en /Programming for Data Science/
+durante el semestre pasado.
+
+
+* Algunas instalaciones necesarias
+
+- Programas (en =Ubuntu=)
+
+#+BEGIN_EXAMPLE shell 
+## Para conectarse a bases de datos PostgreSQL
+> sudo apt-get install libpq-dev
+## Para manipular JSON en consola
+> sudo apt-get install jq
+## Una vaca chistosa
+> sudo apt-get install cowsay
+#+END_EXAMPLE
+
+- Paquetes de  =python=
+
+#+BEGIN_EXAMPLE
+> pip install -r requirements.txt
+> pip install -r requirements-dev .txt
+#+END_EXAMPLE
+
+
+*  Unix tools para /big data/
+
+
+* ¿Por qué?
+
+En muchas ocasiones, se verán en la necesidad de responder muy rápido y
+en una etapa muy temprana del proceso de *Ciencia de datos* . Las peticiones
+regularmente serán cosas muy sencillas, como estadística univariable y es
+aquí donde es posible responder con las herramientas /mágicas/ de UNIX.
+
+
+* ¿Cómo funciona?
+
+- Casi todas las herramientas que vamos a ver:
+   - Procesan línea por línea
+   - Leen, por /default/, del =stdin= (el teclado, canal *0*)
+   - Escriben, por /default/ al =stout= (la pantalla, canal *1*)
+   - Y los errores, por /default/ se escriben al =sterr= (canal *2*) 
+
+
+* Comandos que deberían de saber: Navegación
+
+        - cd
+        - mkdir
+        - ls
+        - file
+        - mv
+        - cp
+        - rm
+        - find
+
+* Comandos que deberían de saber: Obtener, procesar, descomprimir
+
+
+        - curl
+        - wget
+        - gunzip
+        - tar 
+        - tr
+
+* Comandos que deberían de saber: Explorar
+
+
+
+        - wc
+        - cat
+        - less
+        - head
+        - tail
+
+* Comandos que deberían de saber: Filtrar, partir, transformar
+
+        - grep
+        - cut
+        - sort
+        - uniq
+        - sed
+        - awk
+
+* Además es necesario...
+
+- Saber pegar los comandos (recuerden es como un [[http://lego.com][lego]] )
+
+- Se van a pegar a través de los *canales*
+
+- Es lo que veremos a continuación
+
+* Pipes 
+
+- =|= (pipe) “Entuba” la salida de un comando al siguiente
+
+#+begin_src shell :results verbatim drawer
+echo 'Me gusta estar en la línea de comandos!' | cowsay
+#+end_src
+
+* Pipes
+
+#+begin_src shell :exports both :results verbatim drawer
+# grep "busca y selecciona" cadenas o patrones (lo veremos al rato)
+seq 50 | grep 3
+#+end_src
+
+
+* Pipes con nombre
+
+Los =pipes= pueden tener un nombre.
+
+#+begin_example shell 
+makefifo pipe_con_nombre
+#+end_example
+
+Ahora podrán usar =>= hacia =pipe_con_nombre= (usando un =&= al final
+del comando) y luego usarlo normalmente.
+
+Hay pocos casos donde se me ocurra usar un pipeline con nombre, pero
+si el proceso va a durar mucho, es una buena idea.
+
+
+* Redirecciones 
+
+- =>= , =>>= Redirecciona la salida de los comandos a un sumidero.
+
+#+begin_example shell
+seq 10 > /tmp/numeros.txt
+#+end_example
+
+#+begin_example shell
+ls >> /tmp/prueba.dat
+#+end_example
+
+*Ejercicio* Ejecuta ambos comandos de nuevo ¿Qué pasa? ¿Cuál es la diferencia
+entre ambos?
+
+* Redirecciones 
+
+- =<= Redirecciona desde el archivo
+
+#+begin_src shell :eval never
+sort < /tmp/prueba.dat # A la línea de comandos acomoda con sort,
+sort < /tmp/prueba.dat > /tmp/prueba_sort.dat # Guardar el sort a un archivo.
+#+end_src
+
+En el siguiente ejemplo redireccionamos al =stdin= el archivo =numeros.txt= como entrada del =wc -l=
+sin generar un nuevo proceso
+
+#+begin_src shell :exports both
+< /tmp/numeros.txt wc -l
+#+end_src
+
+
+* =tee=
+
+Se utiliza para guardar y ver (al mismo tiempo) la salida de cualquier
+comando.
+
+#+begin_src shell :exports both :results verbatim drawer
+ls ~
+#+end_src
+
+#+begin_src shell :exports both :results verbatim drawer
+ls ~ | tee /tmp/listado.txt
+#+end_src
+
+#+begin_src shell :exports both :results verbatim drawer
+cat /tmp/listado.txt
+#+end_src
+
+* Ejemplo (1/6)
+
+(Basado en el ejemplo de Loïc Cerf)
+
+En la carpeta =distros-analysis= hay un archivo llamado =distros=
+
+#+begin_src shell :exports both :results verbatim drawer
+head -5 data/distros-analysis/distros
+#+end_src
+
+Lo podemos usar para descargar todas las páginas de [[http://distrowatch.com][=DistroWatch=]]
+
+#+begin_src shell :eval never
+[ -d /tmp/dw_pages ] || wget -B http://distrowatch.com/ -i data/distros-analysis/distros -P /tmp/dw_pages
+#+end_src
+
+Y los resultados:
+
+#+begin_src shell :exports both :results verbatim drawer
+ls /tmp/dw_pages/* | head -5
+#+end_src
+
+
+#+begin_src shell :exports both :results verbatim drawer
+head -3 /tmp/dw_pages/adios
+#+end_src
+
+
+* Ejemplo (2/6)
+
+Ahora podemos calcular cuales son las =distros= "padres" con más "hijos"
+
+#+begin_src shell :exports both :results verbatim drawer
+sed -n '/basedon=/ s/.*basedon=\([a-zA-Z]*\)".*/\1/p' /tmp/dw_pages/* | head -3
+#+end_src
+
+(Podemos quitar el filtro =/basedon=/=, pero el resultado es más lento)
+
+#+begin_src shell :exports both :results verbatim drawer
+sed -n 's/.*basedon=\([a-zA-Z]*\)".*/\1/p' /tmp/dw_pages/*  | head -3
+#+end_src
+
+
+* Ejemplo (3/6)
+
+Se podría hacer con =grep=
+
+#+begin_src shell :exports both :results verbatim drawer
+grep -o 'basedon=[^"]*' /tmp/dw_pages/* | cut -d = -f 2 | head -3
+#+end_src
+
+
+Y es más rápido con el parámetro =-m=
+
+#+begin_src shell :exports both :results verbatim drawer
+grep -m 1 -o 'basedon=[^"]*' /tmp/dw_pages/* | cut -d = -f 2 | head -3
+#+end_src
+
+*Ejercicio* ¿Por qué crees que sea más rápido?
+
+* Ejemplo (4/6)
+
+Pero el resultado no es el mismo =(O_O)=
+
+#+begin_src shell :exports both :results verbatim drawer
+grep -m 1 -o 'basedon=[^"]*' /tmp/dw_pages/* | cut -d = -f 2 | wc -l
+#+end_src
+
+
+#+begin_src shell :exports both :results verbatim drawer
+sed -n '/basedon=/ s/.*basedon=\([a-zA-Z]*\)".*/\1/p' /tmp/dw_pages/*  | wc -l
+#+end_src
+
+* Ejemplo (5/6)
+
+La diferencia tiene que ver con que =grep= si extrae todos los padres:
+
+#+begin_src shell :exports both :results verbatim drawer
+grep -m 1 -o 'basedon=[^"]*' /tmp/dw_pages/abuledu
+#+end_src
+
+Y =sed= no, sólo muestra el último
+
+#+begin_src shell :exports both :results verbatim drawer
+sed -n '/basedon=/ s/.*basedon=\([a-zA-Z]*\)".*/\1/p' /tmp/dw_pages/abuledu
+#+end_src
+
+
+* Ejemplo (6/6)
+
+Para nuestro "análisis" en particular
+
+#+begin_src shell :exports both :results verbatim drawer
+grep -m 1 -o 'basedon=[^"]*' /tmp/dw_pages/* | \
+cut -d = -f 2 | \
+sort | uniq -c | sort -nr | head -5
+#+end_src
+
+
+Podríamos hacer un análisis similar para país de origen, y siguiendo las diferencias entre =sed= y =grep= podríamos intentar armar un grafo de padres-hijos.
+
+
+* Utilidades varias
+
+ =screen= o =tmux= para tener varias sesiones abiertas en una terminal.
+  - En particular muy útiles para dejar corriendo procesos en el servidor.
+
+ =bg= ó  =&= para mandar procesos al *background*
+
+#+begin_src shell :eval never
+python -m http.server &
+# Ejecuto un servidor HTTP
+#+end_src
+
+ =jobs= para saber cuales están ejecutándose.
+
+ =fg= para traerlos a la vida de nuevo.
+
+* APIs 
+
+- /API/ son iniciales, significa *Application Programming Interface*
+
+- No necesariamente aplica a servicios web. Por ejemplo, =scikit-learn= tiene
+  una /API/ especificada en su documentación.
+
+- - Para el caso de servicios web, existen principalmente dos arquitecturas:
+  =SOAP= (/Simple Object Access Protocol/)  y =REST= (/Representational State
+  Transfer/).
+
+
+* RESTful API 
+
+- Los recursos son identificados en los =request= mediante =URI=s. 
+  - e.g. =.../clientes/id= (Cliente con =id=) =.../clientes/= (todos los clientes)
+- El recurso es conceptualmente diferente de la representación que es regresada
+  al cliente.
+- La comunicación es /stateless/
+- Interfaz uniforme: Los verbos del =HTTP=: 
+
+| =HTTP verb= | Equivalente CRUD |
+|-------------+------------------|
+| =GET=       | Leer             |
+| =POST=      | Crear            |
+| =PUT=       | Update/Remplazar |
+| =PATCH=     | Update/Modificar |
+| =DELETE=    | Borrar           |
+
+
+* Resource URI: ejemplos
+
+
+| =HTTP verb + URI=                                    | Significado                                                   |
+|------------------------------------------------------+---------------------------------------------------------------|
+| =POST http://.../clientes=                           | Crea un cliente                                               |
+| =GET http://.../clientes/5432=                       | Obtiene el cliente con =id= 5432                              |
+| =PUT http://.../productos/1234=                      | Actualiza el producto con =id= 1234                           |
+| =GET http://.../clientes/5432/compras=               | Obtiene todas las compras del cliente 5432                    |
+| =GET http://.../clientes/5432/compras/12/producto/1= | Obtiene el producto 1 de la compra número 12 del cliente 5432 |
+
+
+
+* Interactuando con APIs (con =httpie=)
+
+- Es una alternativa a =curl=, sigue las instrucciones de instalación [[https://github.com/jkbrzt/httpie#installation][aquí]]
+
+#+BEGIN_QUOTE
+httpie is a command line HTTP client. Its goal is to make CLI interaction with
+web services as human-friendly as possible. It provides a simple http command
+that allows for sending arbitrary HTTP requests using a simple and natural
+syntax, and displays colorized output. HTTPie can be used for testing,
+debugging, and generally interacting with HTTP servers.   
+#+END_QUOTE
+
+[[http://ricostacruz.com/cheatsheets/httpie.html][Cheatsheet]]
+
+
+* Interactuando con APIs (con =httpie=)
+
+Para ver un ejemplo usaremos =fixer.io=, un servicio que nos da los tipos de
+cambio.
+
+El estatus actual
+
+#+BEGIN_EXAMPLE shell
+http http://api.fixer.io/latest
+#+END_EXAMPLE
+
+
+Por default es el *EUR* la moneda base, si queremos cambiar hay que pasar un parámetro
+
+#+BEGIN_EXAMPLE  shell 
+http http://api.fixer.io/latest base=="MXN"
+#+END_EXAMPLE
+
+
+O para dos monedas en específico
+
+#+BEGIN_EXAMPLE shell
+http http://api.fixer.io/latest symbols=="MXN,USD"
+#+END_EXAMPLE
+
+Más =APIs= interesantes [[https://github.com/toddmotto/public-apis][aquí]]
+
+* Procesando =json=: =jq=
+
+- Es como un =sed= pero para archivos =json=
+
+Usaremos ahora la [[https://swapi.co/documentation][SWAPI]]
+
+
+#+BEGIN_EXAMPLE shell
+http http:://swapi.co/api/people/
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE shell
+http http:://swapi.co/api/people/ | jq '.results[] | .name'
+#+END_EXAMPLE
+
+El [[https://stedolan.github.io/jq/manual/][manual]] está muy completo, revísalo.
+
+* Procesando =CSV= con =csvkit=
+
+- =csvkit= permite manipular archivos en varios formatos, pero principalmente nos
+deja manipular datos rectangulares.
+
+Descargamos el siguiente archivo en MS Excel:
+
+#+BEGIN_EXAMPLE
+wget https://casact.org/area/rate/Industry\ Data\ Source_Ratemaking\ v\ 3.xlsx -O industry_data.xlsx
+#+END_EXAMPLE
+
+* Procesando =CSV= con =csvkit=
+
+=in2csv= Transforma archivos a =csv=
+
+#+BEGIN_EXAMPLE
+in2csv industry_data.xlsx > industry_data.csv
+#+END_EXAMPLE
+
+Lo podemos observar con =csvlook=
+
+#+BEGIN_EXAMPLE
+csvlook industry.csv | less -S
+#+END_EXAMPLE
+
+Si queremos ver los nombres de las columnas
+
+#+BEGIN_EXAMPLE
+csvcut -n industry.csv
+#+END_EXAMPLE
+
+También nos permite seleccionar columnas
+
+* Procesando =CSV= con =csvkit=
+
+
+Hay dos errores: Los tres primeros renglones y las últimas dos columnas
+
+#+BEGIN_EXAMPLE
+sed -i 1,3d industry_data.csv 
+csvcut --not-columns 20,21 industry_data.csv > industry_data_clean.csv
+#+END_EXAMPLE
+
+El equivalente al =grep= es =csvgrep=
+
+#+BEGIN_EXAMPLE
+csvgrep -c Country -m Worldwide industry_data_clean.csv
+#+END_EXAMPLE
+
+También están los comandos =csvstats=, =csvjoin= y =csvstack=
+
+* Procesando =CSV= con =csvkit=
+
+El verdadero poder aparece al mezclarlo con bases de datos:
+
+Generar el esquema:
+
+#+BEGIN_EXAMPLE
+csvsql -i postgresql industry_data_clean.csv
+#+END_EXAMPLE
+
+Claro que habría que arreglar algunas cosas, pero esto ayudaría mucho con el
+comando =COPY= / =\copy=
+
+También podemos insertar directamente
+
+#+BEGIN_EXAMPLE
+csvsql --db sqlite:///industry_data.db --insert industry_data_clean.csv
+#+END_EXAMPLE
+
+*NOTA*: Sino se especifica el archivo leerá desde =stdin=.
+
+Y aunque podríamos meternos a =sqlite3= y hacer =queries= también podemos
+hacerlo desde la línea de comandos:
+
+#+BEGIN_EXAMPLE
+sql2csv --db sqlite:///industry_data.db --query "select * from industry_data_clean where Country = 'Worldwide'"
+#+END_EXAMPLE
+
+* Tarea #1 (Individual)
+
+#+begin_src org :tangle tareas/tarea_1.org
+
+#+TITLE: Tarea 1
+
+- Mezcla los comandos =httppie=, =jq= y =csvkit= para descargar las películas de *Star Wars* y guardar los campos de   
+  =title,episode_id,director,producer,release_date,opening_crawl= en una base de
+  datos =sqlite= llamada =star_wars.db=.
+#+end_src
+
+* Programando
+* =Bash= /programming/: *loops*
+
+#+begin_example shell 
+for var in =comando=
+do
+instrucción
+instrucción
+...
+done
+#+end_example
+
+* =Bash= /programming/:  Condicionales
+
+#+begin_example sh
+if TEST-COMMANDS; then CONSEQUENT-COMMANDS; fi
+#+end_example
+
+
+Para probar existencia de archivos ver [[https://www.gnu.org/software/bash/manual/html_node/Bash-Conditional-Expressions.html][Bash conditional expressions]].
+
+* =Bash= /programming/
+
+- Al final hay que poner esto en un archivo, ponerlo a correr e irnos
+  a pensar...
+
+- Para cualquier programa *script* es importante que la primera línea del
+  archivo le diga a bash que comando usar para ejecutarlo. 
+
+- También hay dar permisos de ejecución al archivo
+
+#+begin_example shell 
+chmod u+x hola.py ## Convierte el archivo en ejecutable
+#+end_example
+
+* =Bash= /programming/
+
+- A la primera línea se conoce como *shebang* y se representa por =#!= seguido de la ruta al ejecutable. eg. =#!/usr/bin/python= cambia la ejecución de
+
+#+begin_src shell
+python hola.py
+#+end_src
+
+a
+
+#+begin_src shell
+./hola.py
+#+end_src
+
+
+
+
+* ¿Cómo hago mi archivo ejecutable y buen ciudadano?
+  
+- Abre un archivo y teclea tu código
+- Agrega permisos de ejecución con =chmod +x=
+- Define el =shebang=
+- Remueve la parte de =input=
+- Agrega un parámetro
+
+* =Python= /programming/
+
+Usando el truco del =shebang= podemos hacer el siguiente programa:
+
+#+begin_src python :tangle fibonacci.py
+#!/usr/bin/env python
+def fibonacci(x):
+  if n == 0:
+    return 0
+  elif n == 1:
+    return 1
+  else:
+    return fibonacci(n-1) + fibonacci(n-2)
+
+if __name__ == "__main__":
+  import sys
+  x = int(sys.argv[1]) # Hay maneras mas elegantes
+  print(fibonacci(x))
+#+end_src
+
+* =Python= /programming/
+
+Usando el truco del =shebang= podemos hacer el siguiente programa (otro archivo)
+
+Generadores:
+
+#+begin_src python :tangle fibonacci_gen.py
+#!/usr/bin/env python
+
+def fibonacci(x):
+  a,b = 0,1
+  while True:
+    yield a
+    a, b = b, a + b
+
+
+if __name__ == "__main__":
+  import sys
+  x = int(sys.argv[1]) # Hay maneras mas elegantes
+  print(fibonacci(x))
+#+end_src
+
+
+* =R= /programming/
+
+El =shebang= para =R= sería
+
+#+begin_example
+#!/usr/bin/env Rscript
+...
+#+end_example
+
+#+BEGIN_SRC sh
+chmod u+x hola.r
+./hola.r
+#+END_SRC
+
+
+* =Python=, leyendo de =stdin=
+
+#+begin_src python :tangle pipe_me.py :shebang #!/usr/bin/env python
+# coding: utf-8
+
+import re
+import sys
+
+# n = int(sys.argv[1]) # Leemos un entero como argumento (opcional)
+
+while True:
+  linea = sys.stdin.readline()
+
+  if not linea:
+    break
+  # Hacemos algo con la línea
+  print("Linea desde python: {}".format(linea))
+
+#+end_src
+
+
+* =R=, leyendo de =stdin=
+
+#+begin_src R :tangle pipe_me.r :shebang #!/usr/bin/env Rscript
+n <- as.integer(commandArgs(trailingOnly = TRUE)) # Leemos un entero como argumento (opcional)
+
+f <- file("stdin")
+
+open(f)
+
+while(length(line <- readLines(f, n = 1)) > 0) {
+   # Aquí habría que hacer cosas más interesantes con la línea
+   print(paste0("Linea desde R: " , line))
+}
+
+close(f)
+
+#+end_src
+
+* =Python= y =R=, leyendo de =stdin=
+
+#+BEGIN_SRC shell
+seq 1 5 50 > /tmp/data.txt 
+#+END_SRC
+
+
+Ejemplo de uso:
+
+ =R=
+
+#+begin_src shell :results output
+< /tmp/data.txt  ./pipe_me.r
+#+end_src
+
+
+
+ =python=
+
+#+begin_src shell :results output
+< /tmp/data.txt ./pipe_me.py
+#+end_src
+
+* Procesando en Serie
+
+* Serie
+
+Podemos hacer _loops_ sobre varias cosas:
+
+Sobre números
+
+#+begin_src shell :eval never
+for i in {1..100..3}
+do
+echo "$i"
+done
+#+end_src
+
+* Serie
+
+Sobre líneas
+
+#+begin_src shell :results output
+curl -s http://www.gutenberg.org/cache/epub/35/pg35.txt > /tmp/time_machine.txt
+
+while read line
+do
+echo "Línea: ${line}"
+done < /tmp/time_machine.txt | head -3
+#+end_src
+
+* Serie
+
+Y sobre archivos
+
+#+begin_src shell :results output
+for archivo in /tmp/*.txt
+do
+echo "El archivo es ${archivo}"
+done
+#+end_src
+
+
+* Serie:  =find=
+
+Este último código tiene muchos problemas (no maneja espacios o caracteres raros, por ejemplo).
+
+Una mejor alternativa es =find=
+
+#+begin_src shell :results output
+find /tmp  -name '*.txt' -exec echo "El archivo es {}" \;
+#+end_src
+
+
+Además =find= permite buscar por fecha, tamaño, fecha de acceso, permisos, etc.
+
+
+* Continuación de Tarea #1  (Individual)
+
+#+BEGIN_SRC org :tangle tareas/tarea_1.org
+
+- Usando =bash= crea un programa que descargue todas los /resources/ de *SWAPI*
+
+  #+BEGIN_EXAMPLE shell 
+  http GET http://swapi.co/api/
+  #+END_EXAMPLE
+
+  y guárdalos en =jsons= separados usando como nombres de archivo la llave del
+  =json=.
+
+  Toma en cuenta la paginación. Al final deberás de tener sólo 7 archivos.
+
+  Procesa estos archivos con las herramientas del primer inciso de la tarea. Al
+  final deberías de tener 7 tablas en =star_wars.db=
+
+
+#+END_SRC
+
+* Optimizando
+
+* ¿Por qué?
+
+- Todo esto está muy bien, pero ...
+
+- Escribir programas que procesen /linealmente/ los /datasets/ no es
+  una buena idea, la mayoría de las veces.
+
+- ¿Cómo aprovecho todos los =cores= (o =procesadores= si son afortunados) de mi máquina?
+
+* Donald Knuth, 1974
+
+#+BEGIN_QUOTE
+"We should forget about small efficiencies, say about
+97% of the time: premature optimization is the root of
+all evil. Yet we should not pass up our opportunities in
+that critical 3%. A good programmer will not be lulled
+into complacency by such reasoning, he will be wise to
+look carefully at the critical code; but only after that
+code has been identified"
+
+In Computing Surveys, 6(4):261–301, Dec. 1974
+#+END_QUOTE
+
+* ¿Qué comandos elegir?
+
+- Los comandos más específicos(=head=, =tail=, =cat=, =tr=, =wc=, =cut=, =paste=,
+  =comm=, =join=, =uniq=, =sort=, =grep=) son los más rápidos.
+
+- =sed= y =awk= no son tan rápidos como los anteriores, pero pueden
+  ser mucho más rápidos de programar.
+
+- Siempre hay un /trade off/
+
+* Usar RAM
+
+- Los discos duros son muy lentos comparados con el RAM:
+  - =Serial ATA, Revision 2.6=: $0.375$ Gb/s
+  - =DDR3-1333 MHz=: $10.667$ Gb/s
+
+- Entonces si tus archivos /temporales/ son pequeños (comparados con
+  el RAM de tu máquina) guárdalos en un /file system/ temporal.
+
+* Usar RAM
+
+Un ejemplo en  =GNU/Linux=:
+
+#+begin_src shell :results verbatim drawer
+[ -d /tmp/ram_dir ] || mkdir /tmp/ram_dir
+sudo mount -t tmpfs -o size=2G tmpfs /tmp/ram_dir
+#+end_src
+
+Crea un disco de 2Gb llamado =ram_dir=, luego de crearlo, puedes
+usarlo como cualquier carpeta.
+
+Para desmontarlo:
+
+#+begin_src shell :eval never
+sudo umount  /tmp/ram_dir
+#+end_src
+
+**NOTA**: Quizá requieran usar =sudo= para ejecutar el comando =mount= .
+
+* Usar RAM
+
+Podemos probar la velocidad (esto está probado en mi máquina):
+
+En disco (mi disco en particular es de estado sólido):
+
+#+begin_example shell
+time sh -c "dd if=/dev/zero of=/tmp/test conv=fdatasync bs=1M count=1024 && sync"
+1024+0 registros leídos
+1024+0 registros escritos
+1073741824 bytes (1.1 GB, 1.0 GiB) copied, 1.95683 s, 549 MB/s
+sh -c "dd if=/dev/zero of=/tmp/test conv=fdatasync bs=1M count=1024 && sync"  0.00s user 0.93s system 44% cpu 2.086 total
+#+end_example
+
+#+RESULTS[95dfa6333aa29436905d484b4775d7039279b08c]:
+
+* Usar RAM
+
+Y en el disco en RAM:
+
+#+begin_example shell
+time sh -c "dd if=/dev/zero of=/home/nanounanue/tmp/ram_dir/test conv=fdatasync bs=1M count=1024 && sync"
+1024+0 registros leídos
+1024+0 registros escritos
+1073741824 bytes (1.1 GB, 1.0 GiB) copied, 0.293734 s, 3.7 GB/s
+sh -c   0.00s user 0.29s system 96% cpu 0.302 total
+#+end_example
+
+* Archivos comprimidos
+
+No hay necesidad de descomprimir y luego hacer algo con el archivo, es
+más rápido leer el archivo comprimido.
+
+Lee los archivos  =((gz)|(bz2)|(xz))= con  =((z)|(bz)|(xz))less=
+y los pipelines los puedes iniciar con =((z)|(bz)|(xz))cat= o
+=((z)|(bz)|(xz))grep=.
+
+Si puedes manipular los discos, utiliza un sistema de archivos como
+=ZFS= o =Btrfs= ellos tienen habilitada esa opción por /default/.
+
+
+* Procesamiento en Paralelo
+
+* =GNU parallel=: instalación
+
+Leyendo la [[https://www.gnu.org/software/parallel/][documentación]]:
+
+#+begin_example shell 
+(wget -O - pi.dk/3 || curl pi.dk/3/ || fetch -o - http://pi.dk/3) | bash
+#+end_example
+
+*QUESTION*: ¿Qué hace este /script/?
+
+* =GNU parallel=: instalación
+
+ Verificando
+
+#+begin_example shell 
+parallel --version
+#+end_example
+
+* =GNU parallel=: ¿Cuándo?
+
+Necesitas acelerar tu trabajo como científico de datos
+
+- Llamar a varias APIs
+- Intentar varios algoritmos de ML
+  - ¿/Magic loop/ anyone?
+- Procesar varios archivos
+- Obtener estadísticas de varias instancias de tus datasets
+
+
+Lo normal, vamos
+
+* =GNU parallel=: ¿Por qué?
+
+Podrías utilizar =Hadoop=, o =Spark=, o =Storm=
+
+Pero quizá no valga la pena la puesta en marcha, o quizá utilices cosas que no
+sean tuyas (Como una aplicación de *OCR*)
+
+* =GNU parallel=: ¿Qué es?
+
+- Herramienta de línea de comandos
+
+- Creada por *Ole Tange*
+
+- Paraleliza y distribuye los /pipes/
+
+  - Archivos
+
+  - Líneas
+
+  - Argumentos
+
+  - Máquinas (!)
+  
+
+
+* =GNU parallel=
+
+Si tienes dudas sobre tu comando, siempre puedes usar el argumento
+
+#+begin_example shell 
+--dryrun
+#+end_example
+
+Si hay líneas vacías en la fuente, puedes ignorarlas usando
+
+#+BEGIN_EXAMPLE shell
+--no-run-if-empty
+#+END_EXAMPLE
+
+El cual, en lugar de ejecutar, imprimirá las líneas sin hacer nada.
+
+
+* Preparando los datos que usaremos
+
+#+BEGIN_EXAMPLE shell 
+
+seq 1 1e7 > /tmp/1000000.txt
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE shell
+hexdump -v -e '5/1 "%02x""\n"' /dev/urandom |
+  awk -v OFS='\t' 'NR == 1 { print "foo", "bar", "baz" } { print substr($0, 1, 8), substr($0, 9, 2), int(NR * 32768 * rand()) }' |
+  head -n $$1 > /tmp/test.csv
+#+END_EXAMPLE
+
+
+* =GNU parallel=: /placeholders/
+
+
+Intenta el comando =parallel echo {} ::: /tmp/test.csv= y luego ve cambiando los
+={}= por los símbolos listados abajo
+
+- ={.}=
+
+- ={/}=
+
+- ={//}=
+
+- ={/.}=
+
+
+* =GNU parallel=: /placeholders/
+
+Es posible también usar los =headers= de un archivo de texto:
+
+#+BEGIN_EXAMPLE shell
+head -n 6 /tmp/test.csv | parallel --header :  "echo foo: {foo} y baz: {baz}"
+#+END_EXAMPLE
+
+* =GNU parallel=: Fuentes
+
+=parallel= tiene varias formas de recibir parámetros, una de las más sencillas
+es usando =:::=
+
+Una sola fuente 
+
+#+BEGIN_EXAMPLE shell 
+parallel echo ::: A B C
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE shell 
+parallel echo ::: *   # Los archivos de la carpeta donde estamos
+#+END_EXAMPLE
+
+O le puedes pasar  varias fuentes
+
+#+BEGIN_EXAMPLE shell 
+parallel echo ::: A B C ::: 1 2 3
+#+END_EXAMPLE
+
+(Lo cual da el producto cartesiano de las fuentes)
+
+
+* =GNU parallel=: Fuentes
+
+O se puede usar el  =stdin=
+
+#+begin_src shell :results output :export both
+seq 10 | parallel echo {}
+#+end_src
+
+
+#+begin_src shell :eval never
+ls /tmp/*{.txt,.csv} | parallel echo {}
+#+end_src
+
+
+* =GNU parallel=: Fuentes
+
+Usando un archivo 
+
+#+begin_src shell :eval never
+ls /tmp/*{.txt,*csv} >> archivos
+cat archivos
+parallel -a archivo gzip
+#+end_src
+
+
+
+
+* =GNU parallel=: Comprimiendo
+
+Comprimamos los archivos
+
+#+begin_src shell :eval never
+ls /tmp/*{.txt,.csv} | parallel gzip -1
+#+end_src
+
+**NOTA**: Si quisieras descomprimir
+
+#+begin_src shell :eval never
+ls *.gz | parallel gunzip -1
+#+end_src
+
+- Convirtamos a =bz2=
+
+#+begin_src shell :eval never
+ls *.gz | parallel -j0 --eta 'zcat {} | bzip2 -9 > {.}.bz2'
+#+end_src
+
+=-j0= creará cuantos =jobs= en paralelo pueda., =-j1= ejecuta las cosas en serie.
+
+* =GNU parallel=: Scripts
+
+Si tienes que ejecutar una serie de comandos puedes guardarlos en un archivo
+y usar =::::=
+
+#+BEGIN_EXAMPLE shell 
+parallel :::: comandos.sh
+#+END_EXAMPLE
+
+* Ejercicio 
+
+Usando el archivo =data/distros-analysis/distros= descarga en paralelo 
+las distros y comprímelas a =bz2=.
+
+* =GNU parallel=: Logging
+
+- Usa la opción =--results= la cual guarda la salida de cada =job= en un archivo separado.
+
+#+begin_src shell :eval never
+seq 5 | parallel --results log "echo Soy el número {}"
+#+end_src
+
+
+* =GNU parallel=: Progreso
+
+#+begin_src shell :eval never
+parallel --progress sleep ::: 10 3 2 2 1 3 3 2 10
+#+end_src
+
+#+begin_src shell :eval never
+parallel --eta sleep ::: 10 3 2 2 1 3 3 2 10
+#+end_src
+
+Para que no colisione, el progreso se manda al =stderr=.
+
+* =GNU parallel=: Archivotes
+
+En la carpeta =/tmp=, el archivo =1000000.txt= tiene src_shell{< /tmp/1000000.txt  wc -l } {{{results(=10000000=)}}}  líneas.
+
+Podemos procesarlo por pedazos (será muy útil a la hora de cargar en =PostgreSQL=)
+
+#+begin_example shell
+cat /tmp/1000000.txt | parallel --pipe wc -l
+#+end_example
+
+Podemos cambiar el =blocksize=
+
+#+begin_src sh
+cat /tmp/10000000.txt | parallel --pipe --block 3M wc -l
+#+end_src
+
+
+
+(por default corta los bloques en =\n=)
+
+
+* =GNU parallel= y los comandos
+
+Ya vimos como usarlo con =bzip2=
+
+=wc=
+
+#+begin_src sh
+cat /tmp/1000000.txt | parallel --pipe wc -l | awk '{s+=$1} END {print s}'
+#+end_src
+
+
+
+=grep=
+
+#+begin_src shell  :results output
+cat /tmp/1000000.txt | parallel --pipe grep '520' | wc -l
+#+end_src
+
+
+
+* =GNU parallel= y los comandos
+
+ =awk=
+
+#+begin_src shell :results output
+## Nota el escape en el primer awk
+## ¿Para que crees que sea el segundo awk?
+cat /tmp/1000000.txt |
+  parallel --pipe awk \' {s++} END {print s}\' |
+    awk '{s+=$1} END {print s}'
+#+end_src
+
+**NOTA** Si te parece horrible los escapes, puedes guardar el comando de =awk= en un archivo e invocarlo.
+Dentro del  archivo no tendrían que haber escapes.
+
+
+* =GNU parallel= y los comandos
+
+ =sed=
+
+#+begin_src shell
+cat /tmp/1000000.txt |  parallel --pipe sed 's/10000/diezmil/g' | grep diezmil
+#+end_src
+
+
+* =GNU parallel=: Controlando la red
+
+#+begin_src sh
+ls *.gz |  \
+parallel -j0 --eta -S192.168.0.101,: \
+--transfer --return {.}.bz2 --cleanup 'zcat {} | bzip2 -9 >{.}.bz2'
+#+end_src
+
+
+- =-S= lista de servidores (=:= es =localhost=).
+  - require que las máquinas tengan configurado ssh sin password).
+
+- =--transfer= mover los archivos al servidor.
+
+- =--return= regresar los archivos a la máquina que está ejecutando.
+
+- =--cleanup= eliminar los archivos generados de las máquinas remotas.
+
+* Tarea 1 grupal
+
+Adaptado de este [[http://aadrake.com/command-line-tools-can-be-235x-faster-than-your-hadoop-cluster.html][trabajo]]
+
+#+BEGIN_SRC org :tangle tareas/tarea_1_grupal.org
+
+El URL de descarga de eventos de [[http://gdeltproject.org/][=GDELT=]] es
+=http://data.gdeltpoject.org/events/=
+
+Cada uno de los archivos viene en formato =YYYYMMDD.export.CSV.zip=
+
+- Descarguen los archivos desde el mes de Diciembre de 2016 (usando =parallel=
+  obviamente)
+
+- Reporten el número de archivos y el tamaño.
+
+#+begin_example shell
+# Peso los archivos comprimidos
+> du -h .  
+
+# Número de archivos
+> ls *.zip | wc -l   
+#+end_example
+
+- Usando =parallel= y sin descomprimir los archivos guarda los registros de
+  México en una tabla =mexico= en una base de datos =sqlite= llamada =gdelt.db=
+
+- Al comando anterior agrega =tee= y guarda en otra *tabla* (llamada
+  =mexico_ts=) el número de eventos por día y la escala de goldstein 
+
+#+END_SRC
+
+* =GNU parallel=: RTFM
+
+Siempre es bueno tener esto a la mano:
+
+
+[[http://www.gnu.org/software/parallel/parallel_tutorial.html][GNU Parallel Tutorial]]
+
+
+**NOTA:** Con este comando es súper importante, ya que tiene más de 100 banderas...
+
+* Distribuido: AWS
+
+* AWS CLI
+
+Verifiquen que tienen instalado el comando =aws=
+
+#+begin_example shell
+aws help
+#+end_example
+
+ Obtengan sus llaves de Amazon (creen una cuenta, etc.) y luego configuren su =aws= con
+
+#+begin_example shell 
+$ aws configure
+AWS Access Key ID [None]:
+...
+#+end_example
+
+*NOTA*: El archivo =.pem= debe de tener permisos =0600= o te marcará error 
+*NOTA*: La región por omisión es =us-west-2=
+
+* AWS CLI
+
+Agrega lo siguiente al final del archivo ==/.ssh/config=
+
+#+begin_example shell 
+Host *.amazonaws.com
+  IdentityFile ~/.ssh/mi_llave_aws.pem
+  User ubuntu
+#+end_example
+
+Esto es para que puedas hacer =login= sin que te pida la contraseña.
+
+El usuario que estamos usando (=ubuntu=) presupone que tus instancias son de tipo **Ubuntu**.
+
+* AWS DEMO: EC2
+
+Creemos una instancias EC2  
+
+
+* AWS DEMO: RDS
+
+Crearemos una base de datos =PostgreSQL=
+
+
+* AWS DEMO: S3
+
+Crearemos un =bucket= ...
+
+* AWS: EC2
+
+Las podemos ver desde la línea de comandos:
+
+#+begin_src shell
+aws ec2 describe-instances | \
+jq '.Reservations[].Instances[] |  {PublicDnsName, InstanceId, PublicIpAddress}'
+#+end_src
+
+#+BEGIN_SRC shell
+aws s3 ls
+#+END_SRC
+
+* AWS con GNU Parallel
+
+Guardemos el nombre =DNS= en un archivo llamado =instancias=
+
+#+begin_src sh
+aws ec2 describe-instances | \
+jq '.Reservations[].Instances[].PublicDnsName' | \
+tr '"' ' ' > instancias
+#+end_src
+
+
+* Distribuyendo ejecución
+
+Guarda en un archivo llamado =instancias= la dirección de las instancias que tengas corriendo.
+
+Verifiquemos que podemos conectarnos:
+
+#+begin_src sh
+parallel --nonall --slf ./instancias hostname
+#+end_src
+
+
+=slf= = =--sshloginfile=
+
+ =--nonall= significa que se ejecute el mismo comando en todas las máquinas remotas sin parámetros.
+
+Si no tienes máquinas remotas puedes cambiar =--slf instancias= por =--sshlogin :=.
+
+* Distribuyendo =GNU parallel=
+
+Para usar todos los =cores= de la máquina remota debes de tener instalado =parallel=
+
+#+begin_src sh
+parallel --nonall --slf instancias "sudo apt-get install -y parallel"
+#+end_src
+
+* Si no tengo AWS...
+
+Puedes cambiar =--slf instancias= con =--sshlogin := y se ejecutará en local.
+
+#+begin_src sh
+# Sin la parte del reduce
+seq 5000 | parallel  -N1000 --pipe --sshlogin :  "(hostname; wc -l) | paste -sd:"
+#+end_src
+
+
+#+begin_src sh
+# Sin la parte del reduce
+seq 5000 | \
+parallel  -N1000 --pipe --slf instancias "(hostname; wc -l) | paste -sd:"
+#+end_src
+
+* Distribuyendo archivos
+
+#+begin_src sh
+# Sin la parte del reduce
+seq 5000 | \
+parallel  -N1000 --pipe --slf instancias \
+"(hostname; awk '{ sum+=\$1 } END { print sum }') | paste -sd:"
+#+end_src
+
+
+#+begin_src sh
+# Con la parte del reduce
+seq 5000 \
+  | parallel  -N1000 --pipe --slf instancias "(hostname; awk '{ sum+=\$1 } END { print sum }') | paste -sd:" \
+  | awk -F: '{ total += $2 } END { print total }'
+#+end_src
+
+¿Cómo lo modificarías para poder usar archivos? (y no una secuencia)
+
+* Distribuyendo archivos
+
+Si tienes un =script= _local_  y es lo que quieres distribuir (además de archivos) es posible mandarlo para su ejecución.
+
+#+begin_src sh
+seq 5000 | \
+parallel -N1000 --pipe --basefile pipe_me.py  --slf instancias "./pipe_me.py" | \
+ > pipe_me.out
+#+end_src
+
+
+#+begin_src sh
+head -3 pipe_me.out
+#+end_src
+
+
+* Trayendo archivos
+
+Si creamos archivos en los nodos remotos, es posible traerlos a tu máquina, usando las banderas
+
+#+begin_src shell :eval never
+--transfer --return --cleanup
+#+end_src
+
+Ejemplo:
+
+#+begin_src shell
+ls *.org | parallel --transferfile {} --return {}.transformado --cleanup --slf instancias cat {} ">" {}.transformado
+#+end_src
+
+
+
+#+begin_src shell
+wc -l *.org
+#+end_src
+
+
+#+begin_src shell
+wc -l *.org.transformado
+#+end_src
+
+
+También puedes utilizar el _shortcut_ =-trc {.}.transformado=.
+
+
+* AWS CLI: RTFM
+
+[[http://aws.amazon.com/es/cli/][*Interfaz de línea de comandos de AWS*]]
+
+* Continuación de Tarea #1  (Individual)
+
+#+BEGIN_SRC org :tangle tareas/tarea_1.org
+
+- Repite el inciso anterior, pero ahora usando =aws= y =parallel=. Crea 7 instancias de =Amazon EC2=,
+  y en cada una procesa como antes. Distribuye los archivos de ejecución y luego tráelos a tu máquina local para 
+  guardarlos en una base de datos =sqlite=.
+
+  *NOTA* ¡No olvides apagar las máquinas!
+
+#+END_SRC
+
+
+
+* Finalmente...
+
+#+BEGIN_QUOTE
+Computers are supposed to do the work for us.
+If you're doing most of the work for the computer,
+then you've lost your way.
+
+@climagic
+#+END_QUOTE
+
+
+* COMMENT Settings
+
+# Local Variables:
+# org-confirm-babel-evaluate: nil
+# org-export-babel-evaluate: nil
+# ispell-check-comments: exclusive
+# ispell-local-dictionary: "spanish"
+# End:
+
+
+
+* =GNU parallel=: Un último ejemplo
+
+Procesando en serie
+
+#+begin_src sh
+for gdelt_file in *.zip
+do
+unzip -p $gdelt_file | \
+cut -f3,27,31 | \
+awk '{$2 = substr($2,0,2); print $0 }' | \
+awk '{
+  evento[$1,$2]++;
+  goldstein_scale[$1,$2]+=$3
+} END { for (i in evento) print i "\t" evento[i]"\t"goldstein_scale[i]}'
+done | \
+awk  '{
+  evento[$1]+=$2;
+  goldstein_scale[$1]+=$3
+} END {
+  for (i in evento)
+    print substr(i, 0, 4) "\t" substr(i,5,2) "\t" substr(i,8,2) "\t" evento[i] "\t" goldstein_scale[i]/evento[i]
+}' | \
+sort -k1 -k2
+#+end_src
+
+
+* =GNU parallel=: Un último ejemplo
+
+Procesando en  Paralelo
+
+#+begin_src sh
+find . -type f -name '*.zip' -print0 | \
+parallel -0 -j100% \
+"unzip -p {} | \
+cut -f3,27,31 | \
+awk '{\$2 = substr(\$2,0,2); print \$0 }' | \
+awk '{
+  evento[\$1,\$2]++;
+  goldstein_scale[\$1,\$2]+=\$3
+} END { for (i in evento) print i FS evento[i] FS goldstein_scale[i]}'" | \
+awk  '{
+  evento[$1]+=$2;
+  goldstein_scale[$1]+=$3
+} END { for (i in evento) print substr(i, 0, 4) "\t" substr(i,5,2) "\t" substr(i,8,2) "\t" evento[i] "\t" goldstein_scale[i]/evento[i]}' | sort -k1 -k2
+#+end_src
+
